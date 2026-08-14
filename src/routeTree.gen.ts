@@ -10,33 +10,180 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AssistantRouteImport } from './routes/assistant'
+import { Route as CropDoctorRouteImport } from './routes/crop-doctor'
+import { Route as IssueMapRouteImport } from './routes/issue-map'
+import { Route as KnowledgeRouteImport } from './routes/knowledge'
+import { Route as MarketRouteImport } from './routes/market'
+import { Route as MyFarmRouteImport } from './routes/my-farm'
+import { Route as ReportRouteImport } from './routes/report'
+import { Route as SchemesRouteImport } from './routes/schemes'
+import { Route as ServicesRouteImport } from './routes/services'
+import { Route as WeatherRouteImport } from './routes/weather'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssistantRoute = AssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CropDoctorRoute = CropDoctorRouteImport.update({
+  id: '/crop-doctor',
+  path: '/crop-doctor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IssueMapRoute = IssueMapRouteImport.update({
+  id: '/issue-map',
+  path: '/issue-map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KnowledgeRoute = KnowledgeRouteImport.update({
+  id: '/knowledge',
+  path: '/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketRoute = MarketRouteImport.update({
+  id: '/market',
+  path: '/market',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyFarmRoute = MyFarmRouteImport.update({
+  id: '/my-farm',
+  path: '/my-farm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchemesRoute = SchemesRouteImport.update({
+  id: '/schemes',
+  path: '/schemes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WeatherRoute = WeatherRouteImport.update({
+  id: '/weather',
+  path: '/weather',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/assistant': typeof AssistantRoute
+  '/crop-doctor': typeof CropDoctorRoute
+  '/issue-map': typeof IssueMapRoute
+  '/knowledge': typeof KnowledgeRoute
+  '/market': typeof MarketRoute
+  '/my-farm': typeof MyFarmRoute
+  '/report': typeof ReportRoute
+  '/schemes': typeof SchemesRoute
+  '/services': typeof ServicesRoute
+  '/weather': typeof WeatherRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/assistant': typeof AssistantRoute
+  '/crop-doctor': typeof CropDoctorRoute
+  '/issue-map': typeof IssueMapRoute
+  '/knowledge': typeof KnowledgeRoute
+  '/market': typeof MarketRoute
+  '/my-farm': typeof MyFarmRoute
+  '/report': typeof ReportRoute
+  '/schemes': typeof SchemesRoute
+  '/services': typeof ServicesRoute
+  '/weather': typeof WeatherRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/assistant': typeof AssistantRoute
+  '/crop-doctor': typeof CropDoctorRoute
+  '/issue-map': typeof IssueMapRoute
+  '/knowledge': typeof KnowledgeRoute
+  '/market': typeof MarketRoute
+  '/my-farm': typeof MyFarmRoute
+  '/report': typeof ReportRoute
+  '/schemes': typeof SchemesRoute
+  '/services': typeof ServicesRoute
+  '/weather': typeof WeatherRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/assistant'
+    | '/crop-doctor'
+    | '/issue-map'
+    | '/knowledge'
+    | '/market'
+    | '/my-farm'
+    | '/report'
+    | '/schemes'
+    | '/services'
+    | '/weather'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/assistant'
+    | '/crop-doctor'
+    | '/issue-map'
+    | '/knowledge'
+    | '/market'
+    | '/my-farm'
+    | '/report'
+    | '/schemes'
+    | '/services'
+    | '/weather'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/assistant'
+    | '/crop-doctor'
+    | '/issue-map'
+    | '/knowledge'
+    | '/market'
+    | '/my-farm'
+    | '/report'
+    | '/schemes'
+    | '/services'
+    | '/weather'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  AssistantRoute: typeof AssistantRoute
+  CropDoctorRoute: typeof CropDoctorRoute
+  IssueMapRoute: typeof IssueMapRoute
+  KnowledgeRoute: typeof KnowledgeRoute
+  MarketRoute: typeof MarketRoute
+  MyFarmRoute: typeof MyFarmRoute
+  ReportRoute: typeof ReportRoute
+  SchemesRoute: typeof SchemesRoute
+  ServicesRoute: typeof ServicesRoute
+  WeatherRoute: typeof WeatherRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +195,99 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assistant': {
+      id: '/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crop-doctor': {
+      id: '/crop-doctor'
+      path: '/crop-doctor'
+      fullPath: '/crop-doctor'
+      preLoaderRoute: typeof CropDoctorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/issue-map': {
+      id: '/issue-map'
+      path: '/issue-map'
+      fullPath: '/issue-map'
+      preLoaderRoute: typeof IssueMapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/knowledge': {
+      id: '/knowledge'
+      path: '/knowledge'
+      fullPath: '/knowledge'
+      preLoaderRoute: typeof KnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/market': {
+      id: '/market'
+      path: '/market'
+      fullPath: '/market'
+      preLoaderRoute: typeof MarketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-farm': {
+      id: '/my-farm'
+      path: '/my-farm'
+      fullPath: '/my-farm'
+      preLoaderRoute: typeof MyFarmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/schemes': {
+      id: '/schemes'
+      path: '/schemes'
+      fullPath: '/schemes'
+      preLoaderRoute: typeof SchemesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/weather': {
+      id: '/weather'
+      path: '/weather'
+      fullPath: '/weather'
+      preLoaderRoute: typeof WeatherRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  AssistantRoute: AssistantRoute,
+  CropDoctorRoute: CropDoctorRoute,
+  IssueMapRoute: IssueMapRoute,
+  KnowledgeRoute: KnowledgeRoute,
+  MarketRoute: MarketRoute,
+  MyFarmRoute: MyFarmRoute,
+  ReportRoute: ReportRoute,
+  SchemesRoute: SchemesRoute,
+  ServicesRoute: ServicesRoute,
+  WeatherRoute: WeatherRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
