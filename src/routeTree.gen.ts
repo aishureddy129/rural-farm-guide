@@ -12,7 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as CropDoctorRouteImport } from './routes/crop-doctor'
+import { Route as MarketRouteImport } from './routes/market'
+import { Route as MyFarmRouteImport } from './routes/my-farm'
+import { Route as ReportRouteImport } from './routes/report'
 import { Route as SchemesRouteImport } from './routes/schemes'
+import { Route as WeatherRouteImport } from './routes/weather'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,9 +33,29 @@ const CropDoctorRoute = CropDoctorRouteImport.update({
   path: '/crop-doctor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketRoute = MarketRouteImport.update({
+  id: '/market',
+  path: '/market',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyFarmRoute = MyFarmRouteImport.update({
+  id: '/my-farm',
+  path: '/my-farm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SchemesRoute = SchemesRouteImport.update({
   id: '/schemes',
   path: '/schemes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WeatherRoute = WeatherRouteImport.update({
+  id: '/weather',
+  path: '/weather',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -39,34 +63,75 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/crop-doctor': typeof CropDoctorRoute
+  '/market': typeof MarketRoute
+  '/my-farm': typeof MyFarmRoute
+  '/report': typeof ReportRoute
   '/schemes': typeof SchemesRoute
+  '/weather': typeof WeatherRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/crop-doctor': typeof CropDoctorRoute
+  '/market': typeof MarketRoute
+  '/my-farm': typeof MyFarmRoute
+  '/report': typeof ReportRoute
   '/schemes': typeof SchemesRoute
+  '/weather': typeof WeatherRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/crop-doctor': typeof CropDoctorRoute
+  '/market': typeof MarketRoute
+  '/my-farm': typeof MyFarmRoute
+  '/report': typeof ReportRoute
   '/schemes': typeof SchemesRoute
+  '/weather': typeof WeatherRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/assistant' | '/crop-doctor' | '/schemes'
+  fullPaths:
+    | '/'
+    | '/assistant'
+    | '/crop-doctor'
+    | '/market'
+    | '/my-farm'
+    | '/report'
+    | '/schemes'
+    | '/weather'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/assistant' | '/crop-doctor' | '/schemes'
-  id: '__root__' | '/' | '/assistant' | '/crop-doctor' | '/schemes'
+  to:
+    | '/'
+    | '/assistant'
+    | '/crop-doctor'
+    | '/market'
+    | '/my-farm'
+    | '/report'
+    | '/schemes'
+    | '/weather'
+  id:
+    | '__root__'
+    | '/'
+    | '/assistant'
+    | '/crop-doctor'
+    | '/market'
+    | '/my-farm'
+    | '/report'
+    | '/schemes'
+    | '/weather'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssistantRoute: typeof AssistantRoute
   CropDoctorRoute: typeof CropDoctorRoute
+  MarketRoute: typeof MarketRoute
+  MyFarmRoute: typeof MyFarmRoute
+  ReportRoute: typeof ReportRoute
   SchemesRoute: typeof SchemesRoute
+  WeatherRoute: typeof WeatherRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,11 +157,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CropDoctorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/market': {
+      id: '/market'
+      path: '/market'
+      fullPath: '/market'
+      preLoaderRoute: typeof MarketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-farm': {
+      id: '/my-farm'
+      path: '/my-farm'
+      fullPath: '/my-farm'
+      preLoaderRoute: typeof MyFarmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/schemes': {
       id: '/schemes'
       path: '/schemes'
       fullPath: '/schemes'
       preLoaderRoute: typeof SchemesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/weather': {
+      id: '/weather'
+      path: '/weather'
+      fullPath: '/weather'
+      preLoaderRoute: typeof WeatherRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -106,7 +199,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssistantRoute: AssistantRoute,
   CropDoctorRoute: CropDoctorRoute,
+  MarketRoute: MarketRoute,
+  MyFarmRoute: MyFarmRoute,
+  ReportRoute: ReportRoute,
   SchemesRoute: SchemesRoute,
+  WeatherRoute: WeatherRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
