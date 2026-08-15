@@ -143,7 +143,7 @@ function AssistantPage() {
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { id: nextId(), role: "bot", text: greetings.en! },
+    { id: nextId(), role: "bot", text: greetings['en']! },
   ]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -172,14 +172,14 @@ function AssistantPage() {
     if (timerRef.current) clearTimeout(timerRef.current);
     setTyping(false);
     setInput("");
-    setMessages([{ id: nextId(), role: "bot", text: greetings[lang] ?? greetings.en! }]);
+    setMessages([{ id: nextId(), role: "bot", text: greetings[lang] ?? greetings['en']! }]);
   };
 
   const changeLang = (value: string) => {
     setLang(value);
     setMessages((prev) => [
       ...prev,
-      { id: nextId(), role: "bot", text: greetings[value] ?? greetings.en! },
+      { id: nextId(), role: "bot", text: greetings[value] ?? greetings['en']! },
     ]);
   };
 
