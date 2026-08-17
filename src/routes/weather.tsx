@@ -108,7 +108,7 @@ function buildForecast(state: string, district: string, seedOffset: number): Day
     d.setDate(today.getDate() + i);
     const rain = Math.floor(rand() * 100);
     const conditionIndex = rain > 80 ? 4 : rain > 50 ? 3 : rain > 30 ? 2 : rain > 15 ? 1 : 0;
-    const condition = conditions[conditionIndex] ?? conditions[0];
+    const condition = conditions[conditionIndex]!;
     const high = Math.floor(26 + rand() * 14);
     const low = high - Math.floor(7 + rand() * 6);
     const humidity = Math.floor(50 + rand() * 45);
@@ -204,7 +204,7 @@ function WeatherPage() {
     setForecast(buildForecast(state, district, seedOffset));
   }, [state, district, seedOffset]);
 
-  const today = forecast[0];
+  const today = forecast[0]!;
   const maxRain = Math.max(...forecast.map((d) => d.rain));
   const maxTemp = Math.max(...forecast.map((d) => d.high));
   const anyRain = forecast.some((d) => d.rain >= 60);
@@ -385,7 +385,7 @@ function WeatherPage() {
                   {a.label}
                 </Badge>
               ))}
-              <p className="text-sm text-muted-foreground">{alerts[0].message}</p>
+              <p className="text-sm text-muted-foreground">{alerts[0]!.message}</p>
             </CardContent>
           </Card>
         </div>
