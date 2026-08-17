@@ -108,6 +108,7 @@ function buildForecast(state: string, district: string, seedOffset: number): Day
     d.setDate(today.getDate() + i);
     const rain = Math.floor(rand() * 100);
     const conditionIndex = rain > 80 ? 4 : rain > 50 ? 3 : rain > 30 ? 2 : rain > 15 ? 1 : 0;
+    const condition = conditions[conditionIndex] ?? conditions[0];
     const high = Math.floor(26 + rand() * 14);
     const low = high - Math.floor(7 + rand() * 6);
     const humidity = Math.floor(50 + rand() * 45);
@@ -115,13 +116,13 @@ function buildForecast(state: string, district: string, seedOffset: number): Day
     days.push({
       date: d.toLocaleDateString("en-IN", { day: "numeric", month: "short" }),
       dayName: i === 0 ? "Today" : d.toLocaleDateString("en-IN", { weekday: "short" }),
-      icon: conditions[conditionIndex].icon,
+      icon: condition.icon,
       high,
       low,
       rain,
       humidity,
       wind,
-      label: conditions[conditionIndex].label,
+      label: condition.label,
     });
   }
   return days;
