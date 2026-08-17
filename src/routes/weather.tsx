@@ -251,7 +251,7 @@ function WeatherPage() {
     return list;
   }, [forecast, maxRain, highTempDays, dryDays, maxTemp, anyRain]);
 
-  const advice = cropAdvice[crop];
+  const advice = cropAdvice[crop]!;
   const todayDescription = "Generated for " + crop + " in " + district + ".";
   const cropDescription = "Sowing, irrigation, pest and spraying guidance for " + crop + ".";
 
