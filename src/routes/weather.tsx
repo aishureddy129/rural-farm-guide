@@ -418,7 +418,7 @@ function WeatherPage() {
         </div>
       </Section>
 
-      <Section title="Today's farming advice" description={todayDescription}>
+      <Section title="Today's farming advice" description={`Generated for ${crop} in ${district}.`}>
         <div className="grid gap-5 lg:grid-cols-3">
           {alerts.map((a) => (
             <Card key={a.label} className="shadow-soft">
