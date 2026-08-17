@@ -107,8 +107,7 @@ function buildForecast(state: string, district: string, seedOffset: number): Day
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     const rain = Math.floor(rand() * 100);
-    const conditionIndex =
-      rain > 80 ? 4 : rain > 50 ? 3 : rain > 30 ? 2 : rain > 15 ? 1 : 0;
+    const conditionIndex = rain > 80 ? 4 : rain > 50 ? 3 : rain > 30 ? 2 : rain > 15 ? 1 : 0;
     const high = Math.floor(26 + rand() * 14);
     const low = high - Math.floor(7 + rand() * 6);
     const humidity = Math.floor(50 + rand() * 45);
@@ -140,7 +139,7 @@ const cropAdvice: Record<
   }
 > = {
   Wheat: {
-    sowing: "Sow wheat when soil temperature is 15–22°C and the field is well-prepared after rice harvest.",
+    sowing: "Sow wheat when soil temperature is 15-22°C and the field is well-prepared after rice harvest.",
     irrigation: "Irrigate at crown-root stage and again at flowering. Avoid waterlogging after rain.",
     fertilizer: "Apply first split of 60 kg urea per acre at tillering stage if the forecast is dry.",
     pest: "Watch for yellow rust in cool humid spells; yellow-orange streaks on leaves need urgent spray.",
@@ -148,8 +147,8 @@ const cropAdvice: Record<
     rain: "Heavy rain after sowing can delay emergence and promote root rot; ensure field drainage.",
   },
   "Rice / Paddy": {
-    sowing: "Transplant 20–25 day-old seedlings after monsoon rain fills the field.",
-    irrigation: "Maintain 2–5 cm standing water during tillering and booting; drain before harvest.",
+    sowing: "Transplant 20-25 day-old seedlings after monsoon rain fills the field.",
+    irrigation: "Maintain 2-5 cm standing water during tillering and booting; drain before harvest.",
     fertilizer: "Avoid top-dressing nitrogen if heavy rain is expected in the next 48 hours.",
     pest: "Bacterial leaf blight spreads in warm humid weather; watch for water-soaked leaf tips.",
     spraying: "Do not spray within 6 hours of expected rain; use a sticker-spreader in drizzles.",
@@ -157,7 +156,7 @@ const cropAdvice: Record<
   },
   Tomato: {
     sowing: "Sow nursery seeds in warm soil; transplant after danger of frost and heavy rain passes.",
-    irrigation: "Drip irrigation at 6–8 mm daily gives the best yield and reduces fruit cracking.",
+    irrigation: "Drip irrigation at 6-8 mm daily gives the best yield and reduces fruit cracking.",
     fertilizer: "Top-dress with NPK 19:19:19 after fruit-set; pause before forecast rain.",
     pest: "Early blight and leaf curl thrive in humid weather; scout lower leaves twice a week.",
     spraying: "Apply fungicide early morning; avoid spraying when wind is above 15 km/h.",
@@ -172,7 +171,7 @@ const cropAdvice: Record<
     rain: "Prolonged rain increases boll rot; ensure drainage and pick mature bolls quickly.",
   },
   Groundnut: {
-    sowing: "Sow groundnut when soil moisture is adequate and 3–4 days of rain are not expected.",
+    sowing: "Sow groundnut when soil moisture is adequate and 3-4 days of rain are not expected.",
     irrigation: "Critical irrigations at pegging and pod-filling; avoid during harvest.",
     fertilizer: "Apply gypsum at flowering and a light dose of DAP at 25 days after sowing.",
     pest: "Leaf miner and red hairy caterpillar appear in dry spells; inspect under the canopy.",
@@ -180,6 +179,18 @@ const cropAdvice: Record<
     rain: "Waterlogging during pod-filling causes root rot; build raised ridges and open drains.",
   },
 };
+
+function alertToneClass(tone: "warning" | "info" | "success") {
+  if (tone === "success") return "bg-success/20 text-success";
+  if (tone === "info") return "bg-primary/10 text-primary";
+  return "bg-warning/20 text-warning";
+}
+
+function alertIcon(tone: "warning" | "info" | "success") {
+  if (tone === "success") return <Sprout className="size-5" />;
+  if (tone === "info") return <CloudSun className="size-5" />;
+  return <AlertTriangle className="size-5" />;
+}
 
 function WeatherPage() {
   const [state, setState] = useState("Maharashtra");
@@ -211,7 +222,7 @@ function WeatherPage() {
     if (highTempDays >= 2) {
       list.push({
         label: "High Temperature",
-        message: `${highTempDays} day(s) above 38°C. Avoid heavy field work at midday; irrigate sensitive crops.",
+        message: highTempDays + " day(s) above 38°C. Avoid heavy field work at midday; irrigate sensitive crops.",
         tone: "warning",
       });
     }
@@ -232,7 +243,7 @@ function WeatherPage() {
     if (list.length === 0) {
       list.push({
         label: "Normal Weather",
-        message: "No strong weather extremes expected. Follow routine crop care and scout the field every 2–3 days.",
+        message: "No strong weather extremes expected. Follow routine crop care and scout the field every 2-3 days.",
         tone: "info",
       });
     }
@@ -240,6 +251,8 @@ function WeatherPage() {
   }, [forecast, maxRain, highTempDays, dryDays, maxTemp, anyRain]);
 
   const advice = cropAdvice[crop];
+  const todayDescription = "Generated for " + crop + " in " + district + ".";
+  const cropDescription = "Sowing, irrigation, pest and spraying guidance for " + crop + ".";
 
   return (
     <>
@@ -371,9 +384,7 @@ function WeatherPage() {
                   {a.label}
                 </Badge>
               ))}
-              <p className="text-sm text-muted-foreground">
-                {alerts[0].message}
-              </p>
+              <p className="text-sm text-muted-foreground">{alerts[0].message}</p>
             </CardContent>
           </Card>
         </div>
@@ -406,27 +417,13 @@ function WeatherPage() {
         </div>
       </Section>
 
-      <Section title="Today's farming advice" description={`Generated for ${crop} in ${district}.`}>
+      <Section title="Today's farming advice" description={todayDescription}>
         <div className="grid gap-5 lg:grid-cols-3">
           {alerts.map((a) => (
             <Card key={a.label} className="shadow-soft">
               <CardHeader>
-                <span
-                  className={`flex size-10 items-center justify-center rounded-2xl ${
-                    a.tone === "success"
-                      ? "bg-success/20 text-success"
-                      : a.tone === "info"
-                      ? "bg-primary/10 text-primary"
-                      : "bg-warning/20 text-warning"
-                  }`}
-                >
-                  {a.tone === "success" ? (
-                    <Sprout className="size-5" />
-                  ) : a.tone === "info" ? (
-                    <CloudSun className="size-5" />
-                  ) : (
-                    <AlertTriangle className="size-5" />
-                  )}
+                <span className={"flex size-10 items-center justify-center rounded-2xl " + alertToneClass(a.tone)}>
+                  {alertIcon(a.tone)}
                 </span>
                 <CardTitle className="mt-3 text-base">{a.label}</CardTitle>
                 <CardDescription>{a.message}</CardDescription>
@@ -436,7 +433,7 @@ function WeatherPage() {
         </div>
       </Section>
 
-      <Section title="Crop-specific advisory" description={`Sowing, irrigation, pest and spraying guidance for ${crop}.`}>
+      <Section title="Crop-specific advisory" description={cropDescription}>
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           <Card className="shadow-soft">
             <CardHeader>
