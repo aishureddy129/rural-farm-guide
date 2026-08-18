@@ -64,7 +64,7 @@ function MyFarmPage() {
         eyebrow={t("page.myFarm.eyebrow")}
         title={t("nav.myFarm")}
         description={t("page.myFarm.description")}
-        actions={<Button size="lg" variant="secondary">Add a plot</Button>}
+        actions={<Button size="lg" variant="secondary">{t("common.addPlot")}</Button>}
       />
       <Section>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
