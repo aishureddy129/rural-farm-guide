@@ -15,6 +15,7 @@ import {
   Umbrella,
   CloudFog,
 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { PageHeader, Section } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -194,6 +195,7 @@ function alertIcon(tone: "warning" | "info" | "success") {
 }
 
 function WeatherPage() {
+  const t = useT();
   const [state, setState] = useState("Maharashtra");
   const [district, setDistrict] = useState("Nashik");
   const [crop, setCrop] = useState("Tomato");
@@ -259,9 +261,9 @@ function WeatherPage() {
     <>
       <PageHeader
         icon={CloudSun}
-        eyebrow="Hyperlocal forecast"
-        title="Weather & Farming Advisory"
-        description="Forecasts for your chosen village — translated into what you should do on the field this week."
+        eyebrow={t("page.weather.eyebrow")}
+        title={t("nav.weather")}
+        description={t("page.weather.description")}
       />
       <Section>
         <div className="mb-6 rounded-2xl border border-border bg-background p-5 shadow-soft md:p-6">

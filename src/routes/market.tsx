@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { IndianRupee, TrendingUp, TrendingDown, Search } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { PageHeader, Section } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -66,13 +67,14 @@ function Change({ value }: { value: number }) {
 }
 
 function MarketPage() {
+  const t = useT();
   return (
     <>
       <PageHeader
         icon={IndianRupee}
-        eyebrow="Mandi intelligence"
-        title="Agricultural Market Prices"
-        description="Compare today's rates across nearby mandis, watch weekly trends and know the right day to take your produce to market."
+        eyebrow={t("page.market.eyebrow")}
+        title={t("nav.market")}
+        description={t("page.market.description")}
       />
       <Section>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">

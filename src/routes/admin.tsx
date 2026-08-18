@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ShieldCheck, Users, FileWarning, Timer, CheckCircle2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { PageHeader, Section } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -69,13 +70,14 @@ const priorityTone: Record<string, string> = {
 };
 
 function AdminPage() {
+  const t = useT();
   return (
     <>
       <PageHeader
         icon={ShieldCheck}
-        eyebrow="Officials only"
-        title="Admin Dashboard"
-        description="Nashik district overview — issue backlogs by department, scheme uptake and how villages are using GramSahay."
+        eyebrow={t("page.admin.eyebrow")}
+        title={t("nav.admin")}
+        description={t("page.admin.description")}
         actions={<Badge variant="secondary" className="h-9 px-4 text-sm">Demo data · Aug 2026</Badge>}
       />
       <Section>

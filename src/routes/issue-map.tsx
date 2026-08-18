@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Map, MapPin, Filter } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { PageHeader, Section } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -54,13 +55,14 @@ const counts = [
 ];
 
 function IssueMapPage() {
+  const t = useT();
   return (
     <>
       <PageHeader
         icon={Map}
-        eyebrow="Transparency"
-        title="Issue Map"
-        description="Every reported problem plotted across Nashik district, colour-coded by status so villages and officials see the same picture."
+        eyebrow={t("page.issueMap.eyebrow")}
+        title={t("nav.issueMap")}
+        description={t("page.issueMap.description")}
         actions={
           <Button size="lg" variant="secondary">
             <Filter className="size-4" /> Filter by category

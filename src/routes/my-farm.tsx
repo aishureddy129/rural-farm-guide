@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Sprout, Ruler, Wallet, CalendarDays } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { PageHeader, Section } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -55,13 +56,14 @@ const tasks = [
 ];
 
 function MyFarmPage() {
+  const t = useT();
   return (
     <>
       <PageHeader
         icon={Sprout}
-        eyebrow="Farm record"
-        title="My Farm"
-        description="Ramesh Patil · Rampur, Nashik. Keep every plot, cost and crop stage in one place so advice and subsidies fit your real land."
+        eyebrow={t("page.myFarm.eyebrow")}
+        title={t("nav.myFarm")}
+        description={t("page.myFarm.description")}
         actions={<Button size="lg" variant="secondary">Add a plot</Button>}
       />
       <Section>

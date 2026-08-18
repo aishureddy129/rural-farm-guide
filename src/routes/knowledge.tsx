@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BookOpen, PlayCircle, Clock, Search } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { PageHeader, Section } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -67,13 +68,14 @@ const faqs = [
 ];
 
 function KnowledgePage() {
+  const t = useT();
   return (
     <>
       <PageHeader
         icon={BookOpen}
-        eyebrow="Learn"
-        title="Knowledge Hub"
-        description="Short, practical lessons written for real village conditions — no jargon, no expensive inputs, tested advice."
+        eyebrow={t("page.knowledge.eyebrow")}
+        title={t("nav.knowledge")}
+        description={t("page.knowledge.description")}
       />
       <Section>
         <div className="flex flex-col gap-4 md:flex-row md:items-center">

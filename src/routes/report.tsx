@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Megaphone, Camera, MapPin } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { PageHeader, Section } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,13 +89,14 @@ const statusTone: Record<string, string> = {
 };
 
 function ReportPage() {
+  const t = useT();
   return (
     <>
       <PageHeader
         icon={Megaphone}
-        eyebrow="Civic voice"
-        title="Rural Issue Reporting"
-        description="Raise a village problem in under a minute. Each report is geo-tagged, given a tracking ID and routed to the responsible department."
+        eyebrow={t("page.report.eyebrow")}
+        title={t("nav.report")}
+        description={t("page.report.description")}
       />
       <Section>
         <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">

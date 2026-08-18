@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Bot, Eraser, Mic, Send, User } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { PageHeader, Section } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -139,6 +140,7 @@ let idCounter = 0;
 const nextId = () => ++idCounter;
 
 function AssistantPage() {
+  const t = useT();
   const [lang, setLang] = useState("en");
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
@@ -187,9 +189,9 @@ function AssistantPage() {
     <>
       <PageHeader
         icon={Bot}
-        eyebrow="Conversational help"
-        title="AI Rural Assistant"
-        description="A patient, multilingual assistant that understands farming, welfare schemes and everyday rural paperwork — by text or voice."
+        eyebrow={t("page.assistant.eyebrow")}
+        title={t("nav.assistant")}
+        description={t("page.assistant.description")}
       />
       <Section>
         <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
