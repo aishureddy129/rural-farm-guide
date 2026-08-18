@@ -10,6 +10,7 @@ import {
   Shield,
   Flame,
 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { PageHeader, Section } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -80,13 +81,14 @@ const facilities = [
 ];
 
 function ServicesPage() {
+  const t = useT();
   return (
     <>
       <PageHeader
         icon={LifeBuoy}
-        eyebrow="Directory"
-        title="Essential Services"
-        description="The numbers and places rural families actually need — emergency helplines, health, banking, transport, machinery and livestock support near you."
+        eyebrow={t("page.services.eyebrow")}
+        title={t("nav.services")}
+        description={t("page.services.description")}
       />
       <Section title="Emergency helplines">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">

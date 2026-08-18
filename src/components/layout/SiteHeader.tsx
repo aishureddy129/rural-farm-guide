@@ -4,11 +4,14 @@ import { Menu, Leaf, X } from "lucide-react";
 import { navItems } from "@/lib/nav";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/layout/LanguageSelector";
 
 const primaryNav = navItems.slice(0, 6);
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const t = useT();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-md">
@@ -18,9 +21,9 @@ export function SiteHeader() {
             <Leaf className="size-5" />
           </span>
           <span className="leading-tight">
-            <span className="block font-display text-lg font-semibold">GramSahay AI</span>
+            <span className="block font-display text-lg font-semibold">{t("brand.name")}</span>
             <span className="block text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Smart Rural Assistance
+              {t("brand.tagline")}
             </span>
           </span>
         </Link>
@@ -34,19 +37,20 @@ export function SiteHeader() {
               className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               activeProps={{ className: "bg-secondary text-foreground" }}
             >
-              {item.short}
+              {t(item.shortKey)}
             </Link>
           ))}
         </nav>
 
         <div className="ml-auto flex items-center gap-2 lg:ml-0">
+          <LanguageSelector />
           <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link to="/assistant">Ask AI</Link>
+            <Link to="/assistant">{t("common.askAi")}</Link>
           </Button>
           <Button
             variant="outline"
             size="icon"
-            aria-label="Toggle navigation"
+            aria-label={t("common.menu")}
             onClick={() => setOpen((v) => !v)}
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -71,7 +75,7 @@ export function SiteHeader() {
               activeProps={{ className: "bg-secondary text-foreground" }}
             >
               <item.icon className="size-4 text-primary" />
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           ))}
         </div>

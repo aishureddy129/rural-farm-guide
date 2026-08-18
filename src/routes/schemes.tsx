@@ -9,6 +9,7 @@ import {
   User,
   AlertCircle,
 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { PageHeader, Section } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -280,6 +281,7 @@ function evaluateEligibility(profile: Profile): MatchResult[] {
 }
 
 function SchemesPage() {
+  const t = useT();
   const [profile, setProfile] = useState<Profile>(emptyProfile);
   const [results, setResults] = useState<MatchResult[] | null>(null);
   const [search, setSearch] = useState("");
@@ -339,9 +341,9 @@ function SchemesPage() {
     <>
       <PageHeader
         icon={Landmark}
-        eyebrow="Entitlements"
-        title="Government Scheme Finder"
-        description="We match your land size, crops, income and household details against 300+ central and state schemes, then explain exactly how to apply."
+        eyebrow={t("page.schemes.eyebrow")}
+        title={t("nav.schemes")}
+        description={t("page.schemes.description")}
       />
       <Section>
         <div className="mb-8 rounded-2xl border border-border bg-background p-5 shadow-soft md:p-8">

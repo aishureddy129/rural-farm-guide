@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { Stethoscope, Upload, ShieldAlert, Droplets, Bug, X, RotateCcw, Leaf } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { PageHeader, Section } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -188,6 +189,7 @@ function detectCropFromFilename(filename: string): CropKey {
 }
 
 function CropDoctorPage() {
+  const t = useT();
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedCrop, setSelectedCrop] = useState<CropKey | "auto">("auto");
   const [loading, setLoading] = useState(false);
@@ -240,9 +242,9 @@ function CropDoctorPage() {
     <>
       <PageHeader
         icon={Stethoscope}
-        eyebrow="Plant health"
-        title="AI Crop Doctor"
-        description="Photograph the affected leaf or plant and receive a likely diagnosis, severity rating and an affordable treatment plan."
+        eyebrow={t("page.cropDoctor.eyebrow")}
+        title={t("nav.cropDoctor")}
+        description={t("page.cropDoctor.description")}
       />
       <Section>
         <div className="grid gap-6 lg:grid-cols-2">
