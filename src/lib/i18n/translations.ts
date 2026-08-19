@@ -1,16 +1,13 @@
-export const languages = [
-  { code: "en", label: "English", native: "English" },
-  { code: "te", label: "Telugu", native: "తెలుగు" },
-  { code: "hi", label: "Hindi", native: "हिन्दी" },
-  { code: "mr", label: "Marathi", native: "मराठी" },
-  { code: "ta", label: "Tamil", native: "தமிழ்" },
-  { code: "kn", label: "Kannada", native: "ಕನ್ನಡ" },
-  { code: "bn", label: "Bengali", native: "বাংলা" },
-] as const;
+import { languages, type LanguageCode } from "./languages";
+import { assistant, type AssistantKey } from "./pages/assistant";
+import { cropDoctor, type CropDoctorKey } from "./pages/crop-doctor";
+import { schemes, type SchemesKey } from "./pages/schemes";
+import { weather, type WeatherKey } from "./pages/weather";
 
-export type LanguageCode = (typeof languages)[number]["code"];
+export { languages };
+export type { LanguageCode };
 
-export type TranslationKey = keyof typeof en;
+type CoreKey = keyof typeof en;
 
 const en = {
   "brand.name": "GramSahay AI",
@@ -95,7 +92,7 @@ const en = {
     "District-level view of reports, resolution speed and department performance.",
 } as const;
 
-type Dict = Record<TranslationKey, string>;
+type Dict = Record<CoreKey, string>;
 
 const te: Dict = {
   "brand.name": "గ్రామసహాయ్ AI",
@@ -595,7 +592,7 @@ const bn: Dict = {
     "জেলা স্তরে অভিযোগ, সমাধানের গতি ও দপ্তরের কাজের হিসাব।",
 };
 
-export const dictionaries: Record<LanguageCode, Dict> = {
+const core: Record<LanguageCode, Dict> = {
   en: en as unknown as Dict,
   te,
   hi,
@@ -604,3 +601,23 @@ export const dictionaries: Record<LanguageCode, Dict> = {
   kn,
   bn,
 };
+
+export type TranslationKey =
+  | CoreKey
+  | AssistantKey
+  | CropDoctorKey
+  | SchemesKey
+  | WeatherKey;
+
+export const dictionaries = Object.fromEntries(
+  languages.map((l) => [
+    l.code,
+    {
+      ...core[l.code],
+      ...assistant[l.code],
+      ...cropDoctor[l.code],
+      ...schemes[l.code],
+      ...weather[l.code],
+    },
+  ]),
+) as Record<LanguageCode, Record<TranslationKey, string>>;
