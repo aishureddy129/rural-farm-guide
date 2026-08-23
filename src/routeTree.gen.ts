@@ -20,6 +20,7 @@ import { Route as MyFarmRouteImport } from './routes/my-farm'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as SchemesRouteImport } from './routes/schemes'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as TrackingRouteImport } from './routes/tracking'
 import { Route as WeatherRouteImport } from './routes/weather'
 
 const IndexRoute = IndexRouteImport.update({
@@ -77,6 +78,11 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackingRoute = TrackingRouteImport.update({
+  id: '/tracking',
+  path: '/tracking',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WeatherRoute = WeatherRouteImport.update({
   id: '/weather',
   path: '/weather',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/schemes': typeof SchemesRoute
   '/services': typeof ServicesRoute
+  '/tracking': typeof TrackingRoute
   '/weather': typeof WeatherRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/schemes': typeof SchemesRoute
   '/services': typeof ServicesRoute
+  '/tracking': typeof TrackingRoute
   '/weather': typeof WeatherRoute
 }
 export interface FileRoutesById {
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/schemes': typeof SchemesRoute
   '/services': typeof ServicesRoute
+  '/tracking': typeof TrackingRoute
   '/weather': typeof WeatherRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/schemes'
     | '/services'
+    | '/tracking'
     | '/weather'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/schemes'
     | '/services'
+    | '/tracking'
     | '/weather'
   id:
     | '__root__'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/schemes'
     | '/services'
+    | '/tracking'
     | '/weather'
   fileRoutesById: FileRoutesById
 }
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   ReportRoute: typeof ReportRoute
   SchemesRoute: typeof SchemesRoute
   ServicesRoute: typeof ServicesRoute
+  TrackingRoute: typeof TrackingRoute
   WeatherRoute: typeof WeatherRoute
 }
 
@@ -265,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tracking': {
+      id: '/tracking'
+      path: '/tracking'
+      fullPath: '/tracking'
+      preLoaderRoute: typeof TrackingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/weather': {
       id: '/weather'
       path: '/weather'
@@ -287,6 +307,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportRoute: ReportRoute,
   SchemesRoute: SchemesRoute,
   ServicesRoute: ServicesRoute,
+  TrackingRoute: TrackingRoute,
   WeatherRoute: WeatherRoute,
 }
 export const routeTree = rootRouteImport

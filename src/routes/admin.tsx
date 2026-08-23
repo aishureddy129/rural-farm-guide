@@ -1,180 +1,335 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ShieldCheck, Users, FileWarning, Timer, CheckCircle2 } from "lucide-react";
-import { useT } from "@/lib/i18n";
-import { PageHeader, Section } from "@/components/layout/PageHeader";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { useEffect, useState } from "react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  AlertCircle,
+  BarChart3,
+  CheckCircle,
+  Clock,
+  RefreshCw,
+} from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { PageHeader, Section } from "@/components/layout/PageHeader";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({
-    meta: [
-      { title: "Admin Dashboard — GramSahay AI" },
-      {
-        name: "description",
-        content:
-          "District analytics for issue resolution, scheme uptake, AI usage and village engagement.",
-      },
-      { property: "og:title", content: "Admin Dashboard — GramSahay AI" },
-      {
-        property: "og:description",
-        content: "Monitor rural service delivery and departmental performance.",
-      },
-    ],
-  }),
   component: AdminPage,
 });
 
-const kpis = [
-  { icon: Users, label: "Registered users", value: "12,486", delta: "+8.2% this month" },
-  { icon: FileWarning, label: "Open issues", value: "62", delta: "-11 vs last week" },
-  { icon: Timer, label: "Avg. resolution", value: "5.4 days", delta: "target 7 days" },
-  { icon: CheckCircle2, label: "Resolution rate", value: "88%", delta: "+3 pts" },
-];
-
-const departments = [
-  { name: "Water Supply", open: 18, resolved: 74, sla: 82 },
-  { name: "Public Works (Roads)", open: 21, resolved: 58, sla: 64 },
-  { name: "Electricity Board", open: 9, resolved: 96, sla: 91 },
-  { name: "Health & Sanitation", open: 8, resolved: 63, sla: 77 },
-  { name: "Education", open: 6, resolved: 41, sla: 88 },
-];
-
-const queue = [
-  { id: "GS-2411", issue: "Approach road washed out", village: "Kolwadi", dept: "Public Works", age: "9d", priority: "High" },
-  { id: "GS-2418", issue: "Hand pump dry, Ward 3", village: "Rampur", dept: "Water Supply", age: "3d", priority: "Medium" },
-  { id: "GS-2405", issue: "Canal breach near culvert", village: "Pimpalgaon", dept: "Irrigation", age: "6d", priority: "High" },
-  { id: "GS-2396", issue: "Anganwadi ration delay", village: "Devgaon", dept: "Health", age: "1d", priority: "Medium" },
-  { id: "GS-2388", issue: "Street lights out on main lane", village: "Sinnar", dept: "Electricity", age: "4d", priority: "Low" },
-];
-
-const usage = [
-  { label: "AI Assistant queries", value: 8420, pct: 100 },
-  { label: "Crop Doctor scans", value: 3160, pct: 38 },
-  { label: "Scheme eligibility checks", value: 2740, pct: 33 },
-  { label: "Mandi price lookups", value: 5180, pct: 62 },
-];
-
-const priorityTone: Record<string, string> = {
-  High: "bg-destructive text-destructive-foreground hover:bg-destructive",
-  Medium: "bg-warning text-warning-foreground hover:bg-warning",
-  Low: "bg-secondary text-secondary-foreground hover:bg-secondary",
+type Report = {
+  id: number;
+  tracking_id: string;
+  title: string;
+  category: string;
+  village: string;
+  description: string;
+  status: string;
+  priority: string;
+  department: string | null;
+  photo_url: string | null;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 function AdminPage() {
-  const t = useT();
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
+  const loadReports = async () => {
+    setLoading(true);
+    setMessage("");
+
+    const { data, error } = await supabase
+      .from("reports")
+      .select("*")
+      .order("id", { ascending: false });
+
+    setLoading(false);
+
+    if (error) {
+      console.error(error);
+      setMessage("Failed to load reports.");
+      return;
+    }
+
+    setReports(data || []);
+  };
+
+  useEffect(() => {
+    loadReports();
+  }, []);
+
+  const updateStatus = async (
+    id: number,
+    status: string,
+  ) => {
+    const { error } = await supabase
+      .from("reports")
+      .update({ status })
+      .eq("id", id);
+
+    if (error) {
+      console.error(error);
+      setMessage("Failed to update status.");
+      return;
+    }
+
+    setReports((currentReports) =>
+      currentReports.map((report) =>
+        report.id === id
+          ? { ...report, status }
+          : report,
+      ),
+    );
+  };
+
+  const totalReports = reports.length;
+
+  const openReports = reports.filter(
+    (report) => report.status === "Open",
+  ).length;
+
+  const inProgressReports = reports.filter(
+    (report) =>
+      report.status === "In Progress",
+  ).length;
+
+  const resolvedReports = reports.filter(
+    (report) => report.status === "Resolved",
+  ).length;
+
   return (
     <>
       <PageHeader
-        icon={ShieldCheck}
-        eyebrow={t("page.admin.eyebrow")}
-        title={t("nav.admin")}
-        description={t("page.admin.description")}
-        actions={<Badge variant="secondary" className="h-9 px-4 text-sm">Demo data · Aug 2026</Badge>}
+        icon={BarChart3}
+        eyebrow="ADMIN DASHBOARD"
+        title="Rural Issue Dashboard"
+        description="Monitor village issues, departments and resolution status."
       />
+
       <Section>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {kpis.map((k) => (
-            <Card key={k.label} className="card-hover shadow-soft">
-              <CardHeader className="pb-2">
-                <span className="flex size-10 items-center justify-center rounded-2xl bg-secondary text-primary">
-                  <k.icon className="size-5" />
-                </span>
-                <CardDescription className="pt-3">{k.label}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-semibold">{k.value}</p>
-                <p className="text-xs text-muted-foreground">{k.delta}</p>
+        <div className="space-y-6">
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              onClick={loadReports}
+              disabled={loading}
+            >
+              <RefreshCw className="size-4" />
+              Refresh
+            </Button>
+          </div>
+
+          {message && (
+            <div className="rounded-lg bg-secondary p-3 text-sm">
+              {message}
+            </div>
+          )}
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Card className="shadow-soft">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <BarChart3 className="size-5" />
+
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Total Reports
+                    </p>
+
+                    <p className="text-2xl font-bold">
+                      {totalReports}
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <Card className="shadow-soft">
-            <CardHeader>
-              <CardTitle className="text-base">Department performance</CardTitle>
-              <CardDescription>SLA compliance over the last 30 days.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              {departments.map((d) => (
-                <div key={d.name}>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{d.name}</span>
-                    <span className="text-muted-foreground">
-                      {d.open} open · {d.resolved} resolved
-                    </span>
-                  </div>
-                  <div className="mt-2 flex items-center gap-3">
-                    <Progress value={d.sla} className="h-2" />
-                    <span className="w-10 text-right text-xs font-medium">{d.sla}%</span>
+            <Card className="shadow-soft">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="size-5" />
+
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Open
+                    </p>
+
+                    <p className="text-2xl font-bold">
+                      {openReports}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-soft">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <Clock className="size-5" />
+
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      In Progress
+                    </p>
+
+                    <p className="text-2xl font-bold">
+                      {inProgressReports}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-soft">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="size-5" />
+
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Resolved
+                    </p>
+
+                    <p className="text-2xl font-bold">
+                      {resolvedReports}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           <Card className="shadow-soft">
             <CardHeader>
-              <CardTitle className="text-base">Platform usage</CardTitle>
-              <CardDescription>Interactions this month across services.</CardDescription>
+              <CardTitle className="text-base">
+                All Reports
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-5">
-              {usage.map((u) => (
-                <div key={u.label}>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{u.label}</span>
-                    <span className="text-muted-foreground">
-                      {u.value.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                  <Progress value={u.pct} className="mt-2 h-2" />
+
+            <CardContent>
+              {loading ? (
+                <p className="text-sm text-muted-foreground">
+                  Loading reports...
+                </p>
+              ) : reports.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No reports found.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {reports.map((report) => (
+                    <div
+                      key={report.id}
+                      className="rounded-lg border p-4"
+                    >
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-semibold">
+                              {report.title}
+                            </p>
+
+                            <Badge>
+                              {report.status}
+                            </Badge>
+
+                            <Badge variant="outline">
+                              {report.priority}
+                            </Badge>
+                          </div>
+
+                          <p className="text-sm text-muted-foreground">
+                            Tracking ID:{" "}
+                            <strong>
+                              {report.tracking_id}
+                            </strong>
+                          </p>
+
+                          <p className="text-sm">
+                            <strong>Category:</strong>{" "}
+                            {report.category}
+                          </p>
+
+                          <p className="text-sm">
+                            <strong>Village:</strong>{" "}
+                            {report.village}
+                          </p>
+
+                          <p className="text-sm">
+                            <strong>Department:</strong>{" "}
+                            {report.department ||
+                              "Not assigned"}
+                          </p>
+
+                          <p className="text-sm text-muted-foreground">
+                            {report.description}
+                          </p>
+
+                          {report.latitude !== null &&
+                            report.longitude !== null && (
+                              <p className="text-xs text-muted-foreground">
+                                Location:{" "}
+                                {report.latitude},{" "}
+                                {report.longitude}
+                              </p>
+                            )}
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              updateStatus(
+                                report.id,
+                                "Open",
+                              )
+                            }
+                          >
+                            Open
+                          </Button>
+
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              updateStatus(
+                                report.id,
+                                "In Progress",
+                              )
+                            }
+                          >
+                            In Progress
+                          </Button>
+
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              updateStatus(
+                                report.id,
+                                "Resolved",
+                              )
+                            }
+                          >
+                            Resolve
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </CardContent>
           </Card>
         </div>
-      </Section>
-
-      <Section title="Escalation queue" description="Issues nearing or past their service-level deadline.">
-        <Card className="shadow-soft">
-          <CardContent className="overflow-x-auto p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Issue</TableHead>
-                  <TableHead>Village</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Age</TableHead>
-                  <TableHead className="text-right">Priority</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {queue.map((q) => (
-                  <TableRow key={q.id}>
-                    <TableCell className="font-medium">{q.id}</TableCell>
-                    <TableCell>{q.issue}</TableCell>
-                    <TableCell className="text-muted-foreground">{q.village}</TableCell>
-                    <TableCell className="text-muted-foreground">{q.dept}</TableCell>
-                    <TableCell className="text-muted-foreground">{q.age}</TableCell>
-                    <TableCell className="text-right">
-                      <Badge className={priorityTone[q.priority]}>{q.priority}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
       </Section>
     </>
   );
