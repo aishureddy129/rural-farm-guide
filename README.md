@@ -1,62 +1,74 @@
-# GramSahay AI
+# 🌾 GramSahay AI
 
-Create a new web application called GramSahay AI – Smart Rural Assistance Platform.
+## Smart Rural Assistance Platform
 
-Build a professional, modern, responsive rural-tech platform for farmers and rural communities.
+GramSahay AI is a digital platform designed to help rural communities access useful information and services related to agriculture, government schemes, weather, markets, and rural issues.
 
-The application should have these main sections:
+## 🚀 Features
 
-Home
+- 🤖 AI Rural Assistant
+- 🌱 Crop Doctor
+- 🏛️ Government Scheme Finder
+- 🌦️ Weather & Farming Advisory
+- 📊 Agricultural Market Information
+- 📍 Rural Issue Reporting
+- 🗺️ Rural Issue Map
+- 🌾 My Farm
+- 📚 Rural Knowledge Hub
+- 🌐 Multilingual Support
+- 📱 Progressive Web App (PWA)
 
-AI Rural Assistant
+## 🎯 Problem
 
-AI Crop Doctor
+Rural communities often need to search through different sources to find information about farming, government schemes, weather, market prices, and local problems.
 
-Government Scheme Finder
+GramSahay AI brings these services together in one platform.
 
-Weather & Farming Advisory
+## 💡 Solution
 
-Agricultural Market Prices
+The platform provides a single place where rural users can access:
 
-Rural Issue Reporting
+- Agricultural assistance
+- Crop guidance
+- Government schemes
+- Weather information
+- Market information
+- Rural issue reporting
+- Knowledge resources
 
-My Farm
+## 🛠️ Technologies Used
 
-Issue Map
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Git
+- GitHub
+- Vercel
+- PWA
 
-Knowledge Hub
+## 🌐 Live Demo
 
-Essential Services
+https://rural-farm-guide.vercel.app/
 
-Admin Dashboard
+## 📂 GitHub Repository
 
-Use a clean agriculture-inspired design with green and earthy tones, modern cards, icons, responsive layouts, and a professional hackathon-quality appearance.
+https://github.com/aishureddy129/rural-farm-guide
 
-Create the complete frontend structure and navigation for all these pages first.
+## 🔮 Future Improvements
 
-Use realistic demo data where necessary.
+- Real-time weather API
+- Live agricultural market prices
+- Advanced AI crop diagnosis
+- Voice-based rural assistant
+- More Indian regional languages
+- Location-based scheme recommendations
+- Improved rural issue analytics
 
-Do not implement the backend or AI integrations yet. We will add those step by step.
+## 👩‍💻 Developer
 
-This project was built with [Lovable](https://lovable.dev).
+**Aishwarya**
 
-**Live app**: https://rural-farm-guide.lovable.app
+B.Tech CSE – Artificial Intelligence & Machine Learning
 
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/98af9078-cd52-4241-94fb-211703043873).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+GitHub: https://github.com/aishureddy129
