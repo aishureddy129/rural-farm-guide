@@ -49,11 +49,11 @@ The platform provides a single place where rural users can access:
 
 ## 🌐 Live Demo
 
-https://rural-farm-guide.vercel.app/
+[Open GramSahay AI](https://rural-farm-guide.vercel.app/)
 
 ## 📂 GitHub Repository
 
-https://github.com/aishureddy129/rural-farm-guide
+[View Source Code](https://github.com/aishureddy129/rural-farm-guide)
 
 ## 🔮 Future Improvements
 
@@ -71,4 +71,4 @@ https://github.com/aishureddy129/rural-farm-guide
 
 B.Tech CSE – Artificial Intelligence & Machine Learning
 
-GitHub: https://github.com/aishureddy129
+[GitHub Profile](https://github.com/aishureddy129)
