@@ -1,0 +1,78 @@
+import type { LanguageCode } from "../languages";
+
+const en = {
+  "farm.totalLand": "Total land",
+  "farm.plotsRegistered": "Plots registered",
+  "farm.activeCrops": "Active crops",
+  "farm.cropNames": "Crop names",
+  "farm.seasonSpend": "Season spend",
+  "farm.expenseTypes": "Expense types",
+  "farm.nextHarvest": "Next harvest",
+
+  "farm.plots": "Plots",
+  "farm.tasks": "Tasks",
+  "farm.expenses": "Expenses",
+
+  "farm.plotA": "Plot A",
+  "farm.plotB": "Plot B",
+  "farm.plotC": "Plot C",
+
+  "farm.blackCotton": "Black cotton soil",
+  "farm.loamy": "Loamy soil",
+  "farm.sandyLoam": "Sandy loam",
+
+  "farm.onion": "Onion",
+  "farm.soybean": "Soybean",
+  "farm.wheat": "Wheat",
+
+  "farm.sown": "Sown",
+  "farm.seasonProgress": "Season progress",
+
+  "farm.growingWell": "Growing well",
+  "farm.growing": "Growing",
+  "farm.planned": "Planned",
+
+  "farm.weedingRequired": "Weeding required",
+  "farm.irrigationCheck": "Irrigation check",
+  "farm.prepareWheatField": "Prepare wheat field",
+
+  "farm.seeds": "Seeds",
+  "farm.fertilizer": "Fertilizer",
+  "farm.labour": "Labour",
+  "farm.pesticides": "Pesticides",
+
+  "farm.totalSeason": "Total season",
+  "farm.expensesTitle": "Season expenses",
+  "farm.expenseName": "Expense",
+  "farm.expenseAmount": "Amount",
+  "farm.expenseDate": "Date",
+
+  "farm.taskTitle": "Upcoming tasks",
+  "farm.taskName": "Task",
+  "farm.taskDate": "Date",
+
+  "farm.addPlot": "Add plot",
+  "farm.plotName": "Plot name",
+  "farm.area": "Area",
+  "farm.crop": "Crop",
+  "farm.soil": "Soil type",
+  "farm.savePlot": "Save plot",
+  "farm.cancel": "Cancel",
+
+  "farm.acres": "acres",
+
+  "farm.today": "Today",
+  "farm.tomorrow": "Tomorrow",
+
+  "farm.june": "June",
+  "farm.june12": "12 June",
+  "farm.june28": "28 June",
+  "farm.sep": "22 September",
+  "farm.september": "September",
+  "farm.november": "November",
+
+  "farm.farmingAdvice": "Farming advice for your plots",
+  "farm.farmingAdviceDescription":
+    "Get crop-specific advice based on your land, crop stage and upcoming weather.",
+  "farm.askAI": "Ask AI assistant",
+} as const;

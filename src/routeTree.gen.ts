@@ -11,15 +11,18 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdminLoginRouteImport } from './routes/admin-login'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as CropDoctorRouteImport } from './routes/crop-doctor'
 import { Route as IssueMapRouteImport } from './routes/issue-map'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MarketRouteImport } from './routes/market'
 import { Route as MyFarmRouteImport } from './routes/my-farm'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as SchemesRouteImport } from './routes/schemes'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as TrackRouteImport } from './routes/track'
 import { Route as TrackingRouteImport } from './routes/tracking'
 import { Route as WeatherRouteImport } from './routes/weather'
 
@@ -31,6 +34,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin-login',
+  path: '/admin-login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AssistantRoute = AssistantRouteImport.update({
@@ -51,6 +59,11 @@ const IssueMapRoute = IssueMapRouteImport.update({
 const KnowledgeRoute = KnowledgeRouteImport.update({
   id: '/knowledge',
   path: '/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketRoute = MarketRouteImport.update({
@@ -78,6 +91,11 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrackingRoute = TrackingRouteImport.update({
   id: '/tracking',
   path: '/tracking',
@@ -92,30 +110,36 @@ const WeatherRoute = WeatherRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin-login': typeof AdminLoginRoute
   '/assistant': typeof AssistantRoute
   '/crop-doctor': typeof CropDoctorRoute
   '/issue-map': typeof IssueMapRoute
   '/knowledge': typeof KnowledgeRoute
+  '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/my-farm': typeof MyFarmRoute
   '/report': typeof ReportRoute
   '/schemes': typeof SchemesRoute
   '/services': typeof ServicesRoute
+  '/track': typeof TrackRoute
   '/tracking': typeof TrackingRoute
   '/weather': typeof WeatherRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin-login': typeof AdminLoginRoute
   '/assistant': typeof AssistantRoute
   '/crop-doctor': typeof CropDoctorRoute
   '/issue-map': typeof IssueMapRoute
   '/knowledge': typeof KnowledgeRoute
+  '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/my-farm': typeof MyFarmRoute
   '/report': typeof ReportRoute
   '/schemes': typeof SchemesRoute
   '/services': typeof ServicesRoute
+  '/track': typeof TrackRoute
   '/tracking': typeof TrackingRoute
   '/weather': typeof WeatherRoute
 }
@@ -123,15 +147,18 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/admin-login': typeof AdminLoginRoute
   '/assistant': typeof AssistantRoute
   '/crop-doctor': typeof CropDoctorRoute
   '/issue-map': typeof IssueMapRoute
   '/knowledge': typeof KnowledgeRoute
+  '/login': typeof LoginRoute
   '/market': typeof MarketRoute
   '/my-farm': typeof MyFarmRoute
   '/report': typeof ReportRoute
   '/schemes': typeof SchemesRoute
   '/services': typeof ServicesRoute
+  '/track': typeof TrackRoute
   '/tracking': typeof TrackingRoute
   '/weather': typeof WeatherRoute
 }
@@ -140,45 +167,54 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/admin-login'
     | '/assistant'
     | '/crop-doctor'
     | '/issue-map'
     | '/knowledge'
+    | '/login'
     | '/market'
     | '/my-farm'
     | '/report'
     | '/schemes'
     | '/services'
+    | '/track'
     | '/tracking'
     | '/weather'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
+    | '/admin-login'
     | '/assistant'
     | '/crop-doctor'
     | '/issue-map'
     | '/knowledge'
+    | '/login'
     | '/market'
     | '/my-farm'
     | '/report'
     | '/schemes'
     | '/services'
+    | '/track'
     | '/tracking'
     | '/weather'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/admin-login'
     | '/assistant'
     | '/crop-doctor'
     | '/issue-map'
     | '/knowledge'
+    | '/login'
     | '/market'
     | '/my-farm'
     | '/report'
     | '/schemes'
     | '/services'
+    | '/track'
     | '/tracking'
     | '/weather'
   fileRoutesById: FileRoutesById
@@ -186,15 +222,18 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   AssistantRoute: typeof AssistantRoute
   CropDoctorRoute: typeof CropDoctorRoute
   IssueMapRoute: typeof IssueMapRoute
   KnowledgeRoute: typeof KnowledgeRoute
+  LoginRoute: typeof LoginRoute
   MarketRoute: typeof MarketRoute
   MyFarmRoute: typeof MyFarmRoute
   ReportRoute: typeof ReportRoute
   SchemesRoute: typeof SchemesRoute
   ServicesRoute: typeof ServicesRoute
+  TrackRoute: typeof TrackRoute
   TrackingRoute: typeof TrackingRoute
   WeatherRoute: typeof WeatherRoute
 }
@@ -213,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-login': {
+      id: '/admin-login'
+      path: '/admin-login'
+      fullPath: '/admin-login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/assistant': {
@@ -241,6 +287,13 @@ declare module '@tanstack/react-router' {
       path: '/knowledge'
       fullPath: '/knowledge'
       preLoaderRoute: typeof KnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/market': {
@@ -278,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tracking': {
       id: '/tracking'
       path: '/tracking'
@@ -298,15 +358,18 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AdminLoginRoute: AdminLoginRoute,
   AssistantRoute: AssistantRoute,
   CropDoctorRoute: CropDoctorRoute,
   IssueMapRoute: IssueMapRoute,
   KnowledgeRoute: KnowledgeRoute,
+  LoginRoute: LoginRoute,
   MarketRoute: MarketRoute,
   MyFarmRoute: MyFarmRoute,
   ReportRoute: ReportRoute,
   SchemesRoute: SchemesRoute,
   ServicesRoute: ServicesRoute,
+  TrackRoute: TrackRoute,
   TrackingRoute: TrackingRoute,
   WeatherRoute: WeatherRoute,
 }

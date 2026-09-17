@@ -12,20 +12,31 @@ export function LanguageSelector({ className }: { className?: string }) {
   const { lang, setLang, t } = useI18n();
 
   return (
-    <Select value={lang} onValueChange={(v) => setLang(v as LanguageCode)}>
+    <Select
+      value={lang}
+      onValueChange={(value: string) => {
+        setLang(value as LanguageCode);
+      }}
+    >
       <SelectTrigger
-        aria-label={t("common.language")}
         className={className ?? "h-9 w-[130px] gap-2"}
+        aria-label={t("common.language")}
       >
         <Languages className="size-4 text-primary" />
-        <SelectValue />
+        <SelectValue placeholder={t("common.language")} />
       </SelectTrigger>
+
       <SelectContent>
-        {languages.map((l) => (
-          <SelectItem key={l.code} value={l.code}>
-            {l.native}
-          </SelectItem>
-        ))}
+        {languages.map(
+          (language: {
+            code: LanguageCode;
+            native: string;
+          }) => (
+            <SelectItem key={language.code} value={language.code}>
+              {language.native}
+            </SelectItem>
+          ),
+        )}
       </SelectContent>
     </Select>
   );

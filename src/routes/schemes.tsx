@@ -1,99 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import {
-  Landmark,
-  Search,
-  FileCheck2,
-  ChevronDown,
-  RotateCcw,
-  User,
-  AlertCircle,
-} from "lucide-react";
-import { useT } from "@/lib/i18n";
-import { PageHeader, Section } from "@/components/layout/PageHeader";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useT } from "../lib/i18n";
 
 export const Route = createFileRoute("/schemes")({
-  head: () => ({
-    meta: [
-      { title: "Government Scheme Finder — GramSahay AI" },
-        {
-          name: "description",
-          content:
-            "Find central and state schemes you qualify for — subsidies, insurance, pensions and credit — with documents and application steps.",
-        },
-        { property: "og:title", content: "Government Scheme Finder — GramSahay AI" },
-        {
-          property: "og:description",
-          content: "Personalised eligibility matching for rural welfare and farm subsidy schemes.",
-        },
-    ],
-  }),
   component: SchemesPage,
 });
 
-const states = [
-  "Andhra Pradesh",
-  "Bihar",
-  "Gujarat",
-  "Haryana",
-  "Karnataka",
-  "Kerala",
-  "Madhya Pradesh",
-  "Maharashtra",
-  "Odisha",
-  "Punjab",
-  "Rajasthan",
-  "Tamil Nadu",
-  "Telangana",
-  "Uttar Pradesh",
-  "West Bengal",
-];
-
-const categories = ["Small Farmer", "Marginal Farmer", "Other Farmer"];
-const cropTypes = [
-  "Paddy / Rice",
-  "Wheat",
-  "Maize",
-  "Cotton",
-  "Sugarcane",
-  "Tomato",
-  "Groundnut",
-  "Mustard",
-  "Pulses",
-  "Vegetables (other)",
-];
-const irrigationTypes = [
-  "Rain-fed",
-  "Flood / Canal",
-  "Drip irrigation",
-  "Sprinkler",
-  "Borewell / Pump",
-  "Mixed",
-];
-const incomeRanges = [
-  "Below ₹1 lakh",
-  "₹1 lakh – ₹2.5 lakh",
-  "₹2.5 lakh – ₹5 lakh",
-  "₹5 lakh – ₹10 lakh",
-  "Above ₹10 lakh",
-];
-
-const categoriesAll = ["All", "Agriculture", "Insurance", "Credit", "Subsidy", "Welfare", "Women", "Youth"];
-
-type Profile = {
+type FarmerProfile = {
   state: string;
   age: string;
   category: string;
@@ -103,528 +16,1003 @@ type Profile = {
   income: string;
 };
 
-const emptyProfile: Profile = {
-  state: "",
-  age: "",
-  category: "",
-  land: "",
-  crop: "",
-  irrigation: "",
-  income: "",
-};
-
-type SchemeDetail = {
-  id: string;
-  name: string;
-  category: string;
-  dept: string;
-  shortDesc: string;
-  eligibility: string[];
+type SchemeResult = {
+  key: string;
+  fallback: string;
+  status: "eligible" | "likely" | "notEligible";
   benefit: string;
-  estimatedBenefit: string;
-  docs: string[];
-  guidance: string[];
+  officialUrl: string;
 };
 
-const schemeCatalog: SchemeDetail[] = [
-  {
-    id: "pm-kisan",
-    name: "PM-KISAN Samman Nidhi",
-    category: "Agriculture",
-    dept: "Ministry of Agriculture & Farmers Welfare",
-    shortDesc: "Direct income support of ₹6,000 per year for farmer families.",
-    eligibility: [
-      "Small and marginal farmer family owning cultivable land",
-      "Applicant age between 18 and 70 years",
-      "Aadhaar linked to bank account",
-      "Active land record in revenue records",
-    ],
-    benefit: "₹6,000 per year in three equal instalments of ₹2,000",
-    estimatedBenefit: "₹6,000/year",
-    docs: ["Aadhaar", "Land record (7/12 / Khata)", "Bank passbook", "Mobile number"],
-    guidance: [
-      "Visit the PM-KISAN portal or your nearest CSC",
-      "Fill the e-KYC form and upload land documents",
-      "Check Aadhaar-bank linking status before applying",
-      "Track status using your registration number",
-    ],
-  },
-  {
-    id: "pmfby",
-    name: "PM Fasal Bima Yojana",
-    category: "Insurance",
-    dept: "Ministry of Agriculture",
-    shortDesc: "Affordable crop insurance against natural calamities, pests and diseases.",
-    eligibility: [
-      "Farmers growing notified crops in notified areas",
-      "Must have insurable interest in the crop",
-      "Loanee and non-loanee farmers both eligible",
-      "Sowing declaration submitted to insurer / bank",
-    ],
-    benefit: "Kharif premium ~2%, Rabi ~1.5%, commercial crops ~5% of sum insured",
-    estimatedBenefit: "Full sum insured minus subsidised premium",
-    docs: ["Sowing certificate", "Aadhaar", "Bank details", "Land record", "Crop declaration"],
-    guidance: [
-      "Enrol through your bank branch or nearest agriculture office",
-      "Pay premium before the cut-off date for the season",
-      "Report crop loss within 72 hours of the event",
-      "Cooperate with crop-cutting experiment survey",
-    ],
-  },
-  {
-    id: "pmksy",
-    name: "PMKSY – Per Drop More Crop",
-    category: "Subsidy",
-    dept: "Micro-irrigation division, MoA&FW",
-    shortDesc: "Subsidy for drip and sprinkler systems to improve water use efficiency.",
-    eligibility: [
-      "Small and marginal farmers get higher subsidy share",
-      "Must own or lease land with a valid record",
-      "System should be purchased from empanelled vendor",
-      "Water source must be available for irrigation",
-    ],
-    benefit: "Up to 55% subsidy on drip / sprinkler sets for small and marginal farmers",
-    estimatedBenefit: "Approx ₹40,000 – ₹80,000 per acre depending on crop spacing",
-    docs: ["Land record", "Vendor quotation", "Aadhaar", "Water source proof"],
-    guidance: [
-      "Contact your block horticulture / agriculture officer",
-      "Get a site-specific design from an empanelled vendor",
-      "Submit the application online or through the ATMA office",
-      "Install the system after approval and geo-tag the plot",
-    ],
-  },
-  {
-    id: "soil-health",
-    name: "Soil Health Card Scheme",
-    category: "Agriculture",
-    dept: "Department of Agriculture",
-    shortDesc: "Free soil testing and customised nutrient recommendations for your plot.",
-    eligibility: [
-      "Any farmer with a cultivable plot",
-      "Plot should have a survey / khata number",
-      "Priority for small and marginal farmers",
-    ],
-    benefit: "Free soil analysis report with fertiliser dose recommendations",
-    estimatedBenefit: "Saves 10–20% on fertiliser cost; improves yield",
-    docs: ["Aadhaar", "Plot survey number", "Land record"],
-    guidance: [
-      "Approach the village-level soil health officer",
-      "Collect soil sample from the field at 15 cm depth",
-      "Submit sample with the plot details",
-      "Receive the printed card within 3–4 weeks",
-    ],
-  },
-  {
-    id: "kcc",
-    name: "Kisan Credit Card",
-    category: "Credit",
-    dept: "Department of Financial Services",
-    shortDesc: "Short-term credit for crop cultivation and allied activities at low interest.",
-    eligibility: [
-      "Farmers, sharecroppers or tenant farmers with land proof",
-      "Joint liability groups and self-help groups are eligible",
-      "Loan limit generally up to ₹3 lakh at concessional interest",
-    ],
-    benefit: "Crop loan up to ₹3 lakh at 7% interest, dropping to 4% on timely repayment",
-    estimatedBenefit: "Up to ₹3 lakh credit at 4% effective interest",
-    docs: ["Land record", "Photo ID", "Address proof", "Existing loan NOC (if any)"],
-    guidance: [
-      "Apply at your nearest bank branch or through the KCC portal",
-      "Submit the crop-wise loan estimate from the local agriculture office",
-      "Complete the KYC and Aadhaar seeding process",
-      "Renew the card annually before the season starts",
-    ],
-  },
-];
-
-type MatchResult = {
-  scheme: SchemeDetail;
-  match: number;
-  status: "Likely Eligible" | "Check Eligibility";
-};
-
-function evaluateEligibility(profile: Profile): MatchResult[] {
-  const age = parseInt(profile.age || "0", 10);
-  const land = parseFloat(profile.land || "0");
-  const isSmallMarginal = profile.category === "Small Farmer" || profile.category === "Marginal Farmer";
-  const isKharif = ["Paddy / Rice", "Maize", "Cotton", "Sugarcane", "Groundnut"].includes(profile.crop);
-  const isDrip = profile.irrigation === "Drip irrigation";
-
-  return schemeCatalog.map((scheme) => {
-    let match = 50;
-    let status: MatchResult["status"] = "Check Eligibility";
-
-    if (scheme.id === "pm-kisan") {
-      if (isSmallMarginal && land > 0 && age >= 18 && age <= 70) match += 40;
-      else if (land > 0 && age >= 18) match += 20;
-      if (match >= 80) status = "Likely Eligible";
-    } else if (scheme.id === "pmfby") {
-      if (isKharif && land > 0) match += 35;
-      if (land > 0) match += 15;
-      if (match >= 80) status = "Likely Eligible";
-    } else if (scheme.id === "pmksy") {
-      if (isDrip && isSmallMarginal) match += 40;
-      else if (isDrip) match += 25;
-      else if (isSmallMarginal) match += 15;
-      if (match >= 80) status = "Likely Eligible";
-    } else if (scheme.id === "soil-health") {
-      if (land > 0) match += 45;
-      if (match >= 80) status = "Likely Eligible";
-    } else if (scheme.id === "kcc") {
-      if (land > 0 && age >= 18) match += 35;
-      if (isSmallMarginal) match += 15;
-      if (match >= 80) status = "Likely Eligible";
-    }
-
-    return { scheme, match: Math.min(match, 99), status };
-  });
-}
+type LanguageCode =
+  | "en"
+  | "te"
+  | "ta"
+  | "hi"
+  | "kn"
+  | "mr"
+  | "bn";
 
 function SchemesPage() {
   const t = useT();
-  const [profile, setProfile] = useState<Profile>(emptyProfile);
-  const [results, setResults] = useState<MatchResult[] | null>(null);
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [error, setError] = useState<string | null>(null);
 
-  const update = (key: keyof Profile, value: string) => {
-    setProfile((p) => ({ ...p, [key]: value }));
-    setError(null);
+  /*
+   * Safe translation function.
+   * This avoids TypeScript errors when a translation key
+   * is not included in TranslationKey.
+   */
+  const translate = (key: string, fallback: string): string => {
+    try {
+      const translator = t as unknown as (
+        key: string
+      ) => string;
+
+      const value = translator(key);
+
+      if (!value || value === key) {
+        return fallback;
+      }
+
+      return value;
+    } catch {
+      return fallback;
+    }
   };
 
-  const findSchemes = () => {
-    if (!profile.state || !profile.age || !profile.category || !profile.land || !profile.crop || !profile.irrigation || !profile.income) {
-      setError("Please fill all profile fields to see matching schemes.");
-      setResults(null);
-      return;
+  /*
+   * Detect the current language from an already translated
+   * text on this page.
+   *
+   * This works even if your current i18n system does not
+   * expose the language directly.
+   */
+  const getCurrentLanguage = (): LanguageCode => {
+    const categoryText = translate(
+      "schemes.category",
+      "Farmer Category"
+    );
+
+    if (
+      categoryText.includes("రైతు") ||
+      categoryText.includes("వర్గం")
+    ) {
+      return "te";
     }
-    setError(null);
-    setResults(evaluateEligibility(profile));
+
+    if (
+      categoryText.includes("விவசாயி") ||
+      categoryText.includes("வகை")
+    ) {
+      return "ta";
+    }
+
+    if (
+      categoryText.includes("किसान") ||
+      categoryText.includes("श्रेणी")
+    ) {
+      return "hi";
+    }
+
+    if (
+      categoryText.includes("ರೈತ") ||
+      categoryText.includes("ವರ್ಗ")
+    ) {
+      return "kn";
+    }
+
+    if (
+      categoryText.includes("शेतकरी") ||
+      categoryText.includes("वर्ग")
+    ) {
+      return "mr";
+    }
+
+    if (
+      categoryText.includes("কৃষক") ||
+      categoryText.includes("শ্রেণী") ||
+      categoryText.includes("শ্রেণি")
+    ) {
+      return "bn";
+    }
+
+    return "en";
+  };
+
+  const language = getCurrentLanguage();
+
+  /*
+   * Farmer Category translations.
+   *
+   * These are intentionally kept inside this page so the
+   * category options work even when the corresponding
+   * schemes.* translation keys are missing.
+   */
+  const farmerCategoryTranslations: Record<
+    LanguageCode,
+    {
+      select: string;
+      small: string;
+      marginal: string;
+      medium: string;
+      large: string;
+      government: string;
+    }
+  > = {
+    en: {
+      select: "Select Farmer Category",
+      small: "Small Farmer",
+      marginal: "Marginal Farmer",
+      medium: "Medium Farmer",
+      large: "Large Farmer",
+      government: "Government / Institutional",
+    },
+
+    te: {
+      select: "రైతు వర్గాన్ని ఎంచుకోండి",
+      small: "సన్నకారు రైతు",
+      marginal: "చిన్న రైతు",
+      medium: "మధ్య తరహా రైతు",
+      large: "పెద్ద రైతు",
+      government: "ప్రభుత్వ / సంస్థాగత రైతు",
+    },
+
+    ta: {
+      select: "விவசாயி வகையைத் தேர்ந்தெடுக்கவும்",
+      small: "சிறு விவசாயி",
+      marginal: "குறு விவசாயி",
+      medium: "நடுத்தர விவசாயி",
+      large: "பெரிய விவசாயி",
+      government: "அரசு / நிறுவன விவசாயி",
+    },
+
+    hi: {
+      select: "किसान श्रेणी चुनें",
+      small: "छोटे किसान",
+      marginal: "सीमांत किसान",
+      medium: "मध्यम किसान",
+      large: "बड़े किसान",
+      government: "सरकारी / संस्थागत किसान",
+    },
+
+    kn: {
+      select: "ರೈತ ವರ್ಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+      small: "ಸಣ್ಣ ರೈತ",
+      marginal: "ಅತಿ ಸಣ್ಣ ರೈತ",
+      medium: "ಮಧ್ಯಮ ರೈತ",
+      large: "ದೊಡ್ಡ ರೈತ",
+      government: "ಸರ್ಕಾರಿ / ಸಂಸ್ಥೆಯ ರೈತ",
+    },
+
+    mr: {
+      select: "शेतकरी वर्ग निवडा",
+      small: "लहान शेतकरी",
+      marginal: "अल्पभूधारक शेतकरी",
+      medium: "मध्यम शेतकरी",
+      large: "मोठे शेतकरी",
+      government: "सरकारी / संस्थात्मक शेतकरी",
+    },
+
+    bn: {
+      select: "কৃষকের শ্রেণী নির্বাচন করুন",
+      small: "ক্ষুদ্র কৃষক",
+      marginal: "প্রান্তিক কৃষক",
+      medium: "মাঝারি কৃষক",
+      large: "বড় কৃষক",
+      government: "সরকারি / প্রাতিষ্ঠানিক কৃষক",
+    },
+  };
+
+  const farmerCategory =
+    farmerCategoryTranslations[language];
+
+  const [profile, setProfile] =
+    useState<FarmerProfile>({
+      state: "",
+      age: "",
+      category: "",
+      land: "",
+      crop: "",
+      irrigation: "",
+      income: "",
+    });
+
+  const [results, setResults] =
+    useState<SchemeResult[]>([]);
+
+  const [selectedScheme, setSelectedScheme] =
+    useState<string | null>(null);
+
+  const [submitted, setSubmitted] =
+    useState(false);
+
+  const updateProfile = (
+    field: keyof FarmerProfile,
+    value: string
+  ) => {
+    setProfile((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
   };
 
   const resetProfile = () => {
-    setProfile(emptyProfile);
-    setResults(null);
-    setSearch("");
-    setCategory("All");
-    setExpanded(new Set());
-    setError(null);
-  };
-
-  const tryAnotherProfile = () => {
-    resetProfile();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const toggleExpand = (id: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
+    setProfile({
+      state: "",
+      age: "",
+      category: "",
+      land: "",
+      crop: "",
+      irrigation: "",
+      income: "",
     });
+
+    setResults([]);
+    setSelectedScheme(null);
+    setSubmitted(false);
   };
 
-  const filteredResults = results
-    ?.filter((r) => (category === "All" ? true : r.scheme.category === category))
-    .filter(
-      (r) =>
-        r.scheme.name.toLowerCase().includes(search.toLowerCase()) ||
-        r.scheme.shortDesc.toLowerCase().includes(search.toLowerCase()) ||
-        r.scheme.dept.toLowerCase().includes(search.toLowerCase()),
-    )
-    .sort((a, b) => b.match - a.match);
+  const findEligibleSchemes = () => {
+    if (
+      !profile.state ||
+      !profile.age ||
+      !profile.category ||
+      !profile.land ||
+      !profile.crop ||
+      !profile.irrigation ||
+      !profile.income
+    ) {
+      alert(
+        translate(
+          "schemes.errorRequired",
+          "Please fill in all required details."
+        )
+      );
+      return;
+    }
+
+    const age = Number(profile.age);
+    const land = Number(profile.land);
+
+    const schemeResults: SchemeResult[] = [];
+
+    /*
+     * PM-KISAN
+     */
+    schemeResults.push({
+      key: "schemes.pmkisan",
+      fallback: "PM-KISAN",
+      status:
+        age >= 18 &&
+        land > 0 &&
+        profile.category !== "government"
+          ? "eligible"
+          : "notEligible",
+      benefit: "schemes.pmkisanBenefit",
+      officialUrl: "https://pmkisan.gov.in/",
+    });
+
+    /*
+     * PMFBY
+     */
+    schemeResults.push({
+      key: "schemes.pmfby",
+      fallback:
+        "Pradhan Mantri Fasal Bima Yojana",
+      status:
+        profile.crop !== "none"
+          ? "likely"
+          : "notEligible",
+      benefit: "schemes.pmfbyBenefit",
+      officialUrl: "https://pmfby.gov.in/",
+    });
+
+    /*
+     * PMKSY
+     */
+    schemeResults.push({
+      key: "schemes.pmksy",
+      fallback:
+        "Pradhan Mantri Krishi Sinchayee Yojana",
+      status:
+        profile.irrigation === "none" ||
+        profile.irrigation === "rainfed"
+          ? "eligible"
+          : "likely",
+      benefit: "schemes.pmksyBenefit",
+      officialUrl: "https://pmksy.gov.in/",
+    });
+
+    /*
+     * Soil Health Card
+     */
+    schemeResults.push({
+      key: "schemes.soilHealth",
+      fallback: "Soil Health Card",
+      status:
+        land > 0
+          ? "eligible"
+          : "notEligible",
+      benefit: "schemes.soilHealthBenefit",
+      officialUrl:
+        "https://soilhealth.dac.gov.in/",
+    });
+
+    /*
+     * Kisan Credit Card
+     */
+    schemeResults.push({
+      key: "schemes.kcc",
+      fallback: "Kisan Credit Card",
+      status:
+        age >= 18 &&
+        land > 0 &&
+        profile.category !== "government"
+          ? "likely"
+          : "notEligible",
+      benefit: "schemes.kccBenefit",
+      officialUrl:
+        "https://www.myscheme.gov.in/schemes/kcc",
+    });
+
+    setResults(schemeResults);
+    setSubmitted(true);
+    setSelectedScheme(null);
+  };
+
+  const getStatusText = (
+    status: SchemeResult["status"]
+  ) => {
+    if (status === "eligible") {
+      return translate(
+        "schemes.eligible",
+        "Eligible"
+      );
+    }
+
+    if (status === "likely") {
+      return translate(
+        "schemes.likelyEligible",
+        "Likely Eligible"
+      );
+    }
+
+    return translate(
+      "schemes.notEligible",
+      "Not Eligible"
+    );
+  };
+
+  const getStatusClass = (
+    status: SchemeResult["status"]
+  ) => {
+    if (status === "eligible") {
+      return "bg-green-100 text-green-700";
+    }
+
+    if (status === "likely") {
+      return "bg-yellow-100 text-yellow-700";
+    }
+
+    return "bg-red-100 text-red-700";
+  };
 
   return (
-    <>
-      <PageHeader
-        icon={Landmark}
-        eyebrow={t("page.schemes.eyebrow")}
-        title={t("nav.schemes")}
-        description={t("page.schemes.description")}
-      />
-      <Section>
-        <div className="mb-8 rounded-2xl border border-border bg-background p-5 shadow-soft md:p-8">
-          <div className="mb-5 flex items-center gap-3">
-            <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <User className="size-5" />
-            </span>
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-6xl px-4 py-8">
+
+        {/* HEADER */}
+        <div className="mb-8">
+
+          <p className="mb-2 text-sm font-medium text-primary">
+            {translate(
+              "schemes.eligibility",
+              "Eligibility"
+            )}
+          </p>
+
+          <h1 className="text-3xl font-bold tracking-tight">
+            {translate(
+              "schemes.title",
+              "Government Scheme Finder"
+            )}
+          </h1>
+
+          <p className="mt-3 max-w-3xl text-muted-foreground">
+            {translate(
+              "schemes.description",
+              "Tell us about your land, crop and income to find suitable government schemes."
+            )}
+          </p>
+
+        </div>
+
+        {/* FARMER DETAILS */}
+        <div className="mb-8 rounded-xl border bg-card p-6 shadow-sm">
+
+          <h2 className="mb-2 text-xl font-semibold">
+            {translate(
+              "schemes.farmerProfile",
+              "Farmer Details"
+            )}
+          </h2>
+
+          <p className="mb-6 text-muted-foreground">
+            {translate(
+              "schemes.profileDescription",
+              "Complete the following details to find schemes suitable for you."
+            )}
+          </p>
+
+          <div className="grid gap-5 md:grid-cols-2">
+
+            {/* STATE */}
             <div>
-              <h2 className="text-lg font-semibold">Farmer profile</h2>
-              <p className="text-sm text-muted-foreground">
-                Fill the form below to see a demo list of schemes you may qualify for.
-              </p>
-            </div>
-          </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="state">State</Label>
-              <Select value={profile.state} onValueChange={(v) => update("state", v)}>
-                <SelectTrigger id="state" aria-label="Select state">
-                  <SelectValue placeholder="Select state" />
-                </SelectTrigger>
-                <SelectContent>
-                  {states.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <label className="mb-2 block text-sm font-medium">
+                {translate(
+                  "schemes.state",
+                  "State"
+                )}
+              </label>
 
-            <div className="space-y-2">
-              <Label htmlFor="age">Age</Label>
-              <Input
-                id="age"
-                type="number"
-                min={18}
-                max={100}
-                placeholder="e.g. 45"
-                value={profile.age}
-                onChange={(e) => update("age", e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="category">Farmer category</Label>
-              <Select value={profile.category} onValueChange={(v) => update("category", v)}>
-                <SelectTrigger id="category" aria-label="Select farmer category">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="land">Land holding (acres)</Label>
-              <Input
-                id="land"
-                type="number"
-                min={0}
-                step={0.1}
-                placeholder="e.g. 2.5"
-                value={profile.land}
-                onChange={(e) => update("land", e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="crop">Crop type</Label>
-              <Select value={profile.crop} onValueChange={(v) => update("crop", v)}>
-                <SelectTrigger id="crop" aria-label="Select crop type">
-                  <SelectValue placeholder="Select crop" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cropTypes.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="irrigation">Irrigation type</Label>
-              <Select value={profile.irrigation} onValueChange={(v) => update("irrigation", v)}>
-                <SelectTrigger id="irrigation" aria-label="Select irrigation type">
-                  <SelectValue placeholder="Select irrigation" />
-                </SelectTrigger>
-                <SelectContent>
-                  {irrigationTypes.map((i) => (
-                    <SelectItem key={i} value={i}>
-                      {i}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2 sm:col-span-2 lg:col-span-3">
-              <Label htmlFor="income">Annual income range</Label>
-              <Select value={profile.income} onValueChange={(v) => update("income", v)}>
-                <SelectTrigger id="income" aria-label="Select annual income range">
-                  <SelectValue placeholder="Select income range" />
-                </SelectTrigger>
-                <SelectContent>
-                  {incomeRanges.map((i) => (
-                    <SelectItem key={i} value={i}>
-                      {i}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {error && (
-            <div className="mt-5 flex items-center gap-2 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              <AlertCircle className="size-4" />
-              {error}
-            </div>
-          )}
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Button onClick={findSchemes}>
-              <FileCheck2 className="mr-2 size-4" />
-              Find Eligible Schemes
-            </Button>
-            <Button variant="outline" onClick={resetProfile}>
-              <RotateCcw className="mr-2 size-4" />
-              Reset Profile
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4 md:flex-row md:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search schemes, benefits or departments"
-              className="pl-9"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {categoriesAll.map((c) => (
-              <Badge
-                key={c}
-                variant={category === c ? "default" : "secondary"}
-                className="cursor-pointer"
-                onClick={() => setCategory(c)}
+              <select
+                value={profile.state}
+                onChange={(e) =>
+                  updateProfile(
+                    "state",
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border bg-background px-3 py-2"
               >
-                {c}
-              </Badge>
-            ))}
-          </div>
-        </div>
 
-        <div className="mt-6 rounded-xl border border-warning/30 bg-warning/10 p-4">
-          <p className="text-sm font-semibold text-warning-foreground">
-            Demo information — verify eligibility and current benefits through official government sources.
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Eligibility and benefit numbers shown here are simulated for demonstration only. Please confirm details on the official scheme portal, CSC or local agriculture office before applying.
-          </p>
-        </div>
+                <option value="">
+                  {translate(
+                    "schemes.selectState",
+                    "Select State"
+                  )}
+                </option>
 
-        {results === null ? (
-          <div className="mt-10 rounded-2xl border border-dashed border-border bg-muted/30 p-10 text-center">
-            <Landmark className="mx-auto size-10 text-muted-foreground" />
-            <p className="mt-4 text-sm font-medium text-foreground">No matches yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Complete the farmer profile and click “Find Eligible Schemes” to see a demo result list.
-            </p>
-          </div>
-        ) : (
-          <div className="mt-8 space-y-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Showing {filteredResults?.length ?? 0} demo scheme match{filteredResults?.length === 1 ? "" : "es"}
-              </p>
-              <Button variant="outline" size="sm" onClick={tryAnotherProfile}>
-                Try Another Profile
-              </Button>
+                <option value="andhra">
+                  {translate(
+                    "schemes.andhra",
+                    "Andhra Pradesh"
+                  )}
+                </option>
+
+                <option value="telangana">
+                  {translate(
+                    "schemes.telangana",
+                    "Telangana"
+                  )}
+                </option>
+
+                <option value="tamilnadu">
+                  {translate(
+                    "schemes.tamilnadu",
+                    "Tamil Nadu"
+                  )}
+                </option>
+
+                <option value="karnataka">
+                  {translate(
+                    "schemes.karnataka",
+                    "Karnataka"
+                  )}
+                </option>
+
+                <option value="maharashtra">
+                  {translate(
+                    "schemes.maharashtra",
+                    "Maharashtra"
+                  )}
+                </option>
+
+                <option value="westbengal">
+                  {translate(
+                    "schemes.westbengal",
+                    "West Bengal"
+                  )}
+                </option>
+
+                <option value="other">
+                  {translate(
+                    "schemes.other",
+                    "Other"
+                  )}
+                </option>
+
+              </select>
+
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-2">
-              {filteredResults?.map((r) => {
-                const isOpen = expanded.has(r.scheme.id);
-                return (
-                  <Card key={r.scheme.id} className="card-hover shadow-soft">
-                    <CardHeader>
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <CardTitle className="text-lg">{r.scheme.name}</CardTitle>
-                          <CardDescription>{r.scheme.dept}</CardDescription>
-                        </div>
-                        <Badge
-                          variant={r.status === "Likely Eligible" ? "default" : "secondary"}
-                          className={r.status === "Likely Eligible" ? "bg-success hover:bg-success" : ""}
-                        >
-                          {r.status}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground">{r.scheme.shortDesc}</p>
-                      <p className="text-sm font-medium">{r.scheme.benefit}</p>
-                      <div>
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>Eligibility match</span>
-                          <span>{r.match}%</span>
-                        </div>
-                        <Progress value={r.match} className="mt-2 h-2" />
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {r.scheme.docs.map((d) => (
-                          <Badge key={d} variant="outline">
-                            {d}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-between"
-                        onClick={() => toggleExpand(r.scheme.id)}
+            {/* AGE */}
+            <div>
+
+              <label className="mb-2 block text-sm font-medium">
+                {translate(
+                  "schemes.age",
+                  "Age"
+                )}
+              </label>
+
+              <input
+                type="number"
+                min="18"
+                value={profile.age}
+                onChange={(e) =>
+                  updateProfile(
+                    "age",
+                    e.target.value
+                  )
+                }
+                placeholder={translate(
+                  "schemes.agePlaceholder",
+                  "Enter age"
+                )}
+                className="w-full rounded-lg border bg-background px-3 py-2"
+              />
+
+            </div>
+
+            {/* FARMER CATEGORY */}
+            <div>
+
+              <label className="mb-2 block text-sm font-medium">
+                {translate(
+                  "schemes.category",
+                  "Farmer Category"
+                )}
+              </label>
+
+              <select
+                value={profile.category}
+                onChange={(e) =>
+                  updateProfile(
+                    "category",
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border bg-background px-3 py-2"
+              >
+
+                <option value="">
+                  {farmerCategory.select}
+                </option>
+
+                <option value="small">
+                  {farmerCategory.small}
+                </option>
+
+                <option value="marginal">
+                  {farmerCategory.marginal}
+                </option>
+
+                <option value="medium">
+                  {farmerCategory.medium}
+                </option>
+
+                <option value="large">
+                  {farmerCategory.large}
+                </option>
+
+                <option value="government">
+                  {farmerCategory.government}
+                </option>
+
+              </select>
+
+            </div>
+
+            {/* LAND */}
+            <div>
+
+              <label className="mb-2 block text-sm font-medium">
+                {translate(
+                  "schemes.land",
+                  "Land Area (acres)"
+                )}
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={profile.land}
+                onChange={(e) =>
+                  updateProfile(
+                    "land",
+                    e.target.value
+                  )
+                }
+                placeholder={translate(
+                  "schemes.landPlaceholder",
+                  "Enter land area"
+                )}
+                className="w-full rounded-lg border bg-background px-3 py-2"
+              />
+
+            </div>
+
+            {/* CROP */}
+            <div>
+
+              <label className="mb-2 block text-sm font-medium">
+                {translate(
+                  "schemes.crop",
+                  "Crop Type"
+                )}
+              </label>
+
+              <select
+                value={profile.crop}
+                onChange={(e) =>
+                  updateProfile(
+                    "crop",
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border bg-background px-3 py-2"
+              >
+
+                <option value="">
+                  {translate(
+                    "schemes.selectCrop",
+                    "Select Crop"
+                  )}
+                </option>
+
+                <option value="paddy">
+                  {translate(
+                    "schemes.paddy",
+                    "Paddy"
+                  )}
+                </option>
+
+                <option value="wheat">
+                  {translate(
+                    "schemes.wheat",
+                    "Wheat"
+                  )}
+                </option>
+
+                <option value="cotton">
+                  {translate(
+                    "schemes.cotton",
+                    "Cotton"
+                  )}
+                </option>
+
+                <option value="maize">
+                  {translate(
+                    "schemes.maize",
+                    "Maize"
+                  )}
+                </option>
+
+                <option value="vegetables">
+                  {translate(
+                    "schemes.vegetables",
+                    "Vegetables"
+                  )}
+                </option>
+
+                <option value="pulses">
+                  {translate(
+                    "schemes.pulses",
+                    "Pulses"
+                  )}
+                </option>
+
+                <option value="none">
+                  {translate(
+                    "schemes.noCrop",
+                    "No Crop"
+                  )}
+                </option>
+
+              </select>
+
+            </div>
+
+            {/* IRRIGATION */}
+            <div>
+
+              <label className="mb-2 block text-sm font-medium">
+                {translate(
+                  "schemes.irrigation",
+                  "Irrigation Type"
+                )}
+              </label>
+
+              <select
+                value={profile.irrigation}
+                onChange={(e) =>
+                  updateProfile(
+                    "irrigation",
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border bg-background px-3 py-2"
+              >
+
+                <option value="">
+                  {translate(
+                    "schemes.selectIrrigation",
+                    "Select Irrigation Type"
+                  )}
+                </option>
+
+                <option value="borewell">
+                  {translate(
+                    "schemes.borewell",
+                    "Borewell"
+                  )}
+                </option>
+
+                <option value="canal">
+                  {translate(
+                    "schemes.canal",
+                    "Canal"
+                  )}
+                </option>
+
+                <option value="drip">
+                  {translate(
+                    "schemes.drip",
+                    "Drip Irrigation"
+                  )}
+                </option>
+
+                <option value="rainfed">
+                  {translate(
+                    "schemes.rainfed",
+                    "Rainfed"
+                  )}
+                </option>
+
+                <option value="none">
+                  {translate(
+                    "schemes.noIrrigation",
+                    "No Irrigation"
+                  )}
+                </option>
+
+              </select>
+
+            </div>
+
+            {/* INCOME */}
+            <div>
+
+              <label className="mb-2 block text-sm font-medium">
+                {translate(
+                  "schemes.income",
+                  "Annual Income Range"
+                )}
+              </label>
+
+              <select
+                value={profile.income}
+                onChange={(e) =>
+                  updateProfile(
+                    "income",
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border bg-background px-3 py-2"
+              >
+
+                <option value="">
+                  {translate(
+                    "schemes.selectIncome",
+                    "Select Income Range"
+                  )}
+                </option>
+
+                <option value="below1">
+                  {translate(
+                    "schemes.below1",
+                    "Below ₹1 lakh"
+                  )}
+                </option>
+
+                <option value="1to3">
+                  {translate(
+                    "schemes.1to3",
+                    "₹1 lakh – ₹3 lakh"
+                  )}
+                </option>
+
+                <option value="3to5">
+                  {translate(
+                    "schemes.3to5",
+                    "₹3 lakh – ₹5 lakh"
+                  )}
+                </option>
+
+                <option value="above5">
+                  {translate(
+                    "schemes.above5",
+                    "Above ₹5 lakh"
+                  )}
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+          {/* BUTTONS */}
+          <div className="mt-6 flex flex-wrap gap-3">
+
+            <button
+              type="button"
+              onClick={findEligibleSchemes}
+              className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90"
+            >
+              {translate(
+                "schemes.find",
+                "Find Eligible Schemes"
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={resetProfile}
+              className="rounded-lg border px-5 py-2.5 text-sm font-medium hover:bg-muted"
+            >
+              {translate(
+                "schemes.reset",
+                "Reset Details"
+              )}
+            </button>
+
+          </div>
+
+        </div>
+
+        {/* RESULTS */}
+        {submitted && (
+          <div className="mb-8">
+
+            <h2 className="mb-5 text-2xl font-bold">
+              {translate(
+                "schemes.eligibilityMatch",
+                "Eligibility Results"
+              )}
+            </h2>
+
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+
+              {results.map((scheme) => (
+
+                <div
+                  key={scheme.key}
+                  className="rounded-xl border bg-card p-6 shadow-sm"
+                >
+
+                  <h3 className="mb-4 text-lg font-semibold">
+                    {translate(
+                      scheme.key,
+                      scheme.fallback
+                    )}
+                  </h3>
+
+                  <div
+                    className={`mb-5 inline-flex rounded-full px-3 py-1 text-sm font-medium ${getStatusClass(
+                      scheme.status
+                    )}`}
+                  >
+                    {getStatusText(
+                      scheme.status
+                    )}
+                  </div>
+
+                  <div>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSelectedScheme(
+                          selectedScheme === scheme.key
+                            ? null
+                            : scheme.key
+                        )
+                      }
+                      className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                    >
+                      {selectedScheme === scheme.key
+                        ? translate(
+                            "schemes.hideDetails",
+                            "Hide Details"
+                          )
+                        : translate(
+                            "schemes.viewDetails",
+                            "View Details"
+                          )}
+                    </button>
+
+                  </div>
+
+                  {selectedScheme === scheme.key && (
+
+                    <div className="mt-5 rounded-lg border bg-muted/40 p-4">
+
+                      <p className="mb-2 text-sm font-semibold">
+                        {translate(
+                          "schemes.estimatedBenefit",
+                          "Estimated Benefit"
+                        )}
+                      </p>
+
+                      <p className="text-sm leading-6 text-muted-foreground">
+                        {translate(
+                          scheme.benefit,
+                          "Benefits depend on official government guidelines and eligibility."
+                        )}
+                      </p>
+
+                      <p className="mt-4 text-sm font-semibold">
+                        {translate(
+                          "schemes.applicationGuidance",
+                          "Application Method"
+                        )}
+                      </p>
+
+                      <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                        {translate(
+                          "schemes.demoText",
+                          "The information shown here is for demonstration only. Please verify the details on the official government portal or local agriculture office before applying."
+                        )}
+                      </p>
+
+                      <a
+                        href={scheme.officialUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
                       >
-                        {isOpen ? "Hide details" : "View details"}
-                        <ChevronDown
-                          className={`size-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                        />
-                      </Button>
+                        {translate(
+                          "schemes.applyOfficial",
+                          "Apply on Official Portal →"
+                        )}
+                      </a>
 
-                      {isOpen && (
-                        <div className="space-y-4 rounded-xl bg-muted/40 p-4">
-                          <div>
-                            <h4 className="text-sm font-semibold">Eligibility</h4>
-                            <ul className="mt-2 space-y-1.5">
-                              {r.scheme.eligibility.map((e) => (
-                                <li key={e} className="flex gap-2 text-sm text-muted-foreground">
-                                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
-                                  {e}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-semibold">Estimated benefit</h4>
-                            <p className="mt-1 text-sm text-muted-foreground">{r.scheme.estimatedBenefit}</p>
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-semibold">Application guidance</h4>
-                            <ol className="mt-2 space-y-1.5">
-                              {r.scheme.guidance.map((g, i) => (
-                                <li key={g} className="flex gap-2 text-sm text-muted-foreground">
-                                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold text-foreground">
-                                    {i + 1}
-                                  </span>
-                                  {g}
-                                </li>
-                              ))}
-                            </ol>
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                    </div>
+
+                  )}
+
+                </div>
+
+              ))}
+
             </div>
+
           </div>
         )}
-      </Section>
-    </>
+
+        {/* APPLICATION */}
+        <div className="mt-8 rounded-xl border bg-card p-6 shadow-sm">
+
+          <h2 className="mb-3 text-xl font-semibold">
+            {translate(
+              "schemes.application",
+              "Application Method"
+            )}
+          </h2>
+
+          <p className="text-muted-foreground">
+            {translate(
+              "schemes.demoText",
+              "The information shown here is for demonstration only. Please verify the details on the official government portal or local agriculture office before applying."
+            )}
+          </p>
+
+        </div>
+
+      </div>
+    </div>
   );
 }

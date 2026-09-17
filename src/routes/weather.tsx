@@ -1,493 +1,2400 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import {
-  CloudSun,
-  Droplets,
-  Wind,
-  Sun,
-  CloudRain,
-  CloudLightning,
-  AlertTriangle,
-  Sprout,
-  RefreshCw,
-  MapPin,
-  Thermometer,
-  Umbrella,
-  CloudFog,
-} from "lucide-react";
-import { useT } from "@/lib/i18n";
-import { PageHeader, Section } from "@/components/layout/PageHeader";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { useMemo, useState } from "react";
+import { useI18n, type LanguageCode } from "@/lib/i18n";
 
 export const Route = createFileRoute("/weather")({
-  head: () => ({
-    meta: [
-      { title: "Weather & Farming Advisory — GramSahay AI" },
-      {
-        name: "description",
-        content:
-          "Village-level 7-day forecasts with sowing, irrigation and spraying advisories plus severe weather alerts.",
-      },
-      { property: "og:title", content: "Weather & Farming Advisory — GramSahay AI" },
-      {
-        property: "og:description",
-        content: "Hyperlocal forecasts translated into practical farm actions.",
-      },
-    ],
-  }),
   component: WeatherPage,
 });
 
-const states = [
-  "Andhra Pradesh",
-  "Bihar",
-  "Gujarat",
-  "Haryana",
-  "Karnataka",
-  "Kerala",
-  "Madhya Pradesh",
-  "Maharashtra",
-  "Odisha",
-  "Punjab",
-  "Rajasthan",
-  "Tamil Nadu",
-  "Telangana",
-  "Uttar Pradesh",
-  "West Bengal",
-];
+/* =========================================================
+   PAGE TRANSLATIONS
+========================================================= */
 
-const crops = ["Wheat", "Rice / Paddy", "Tomato", "Cotton", "Groundnut"];
-
-const conditions = [
-  { label: "Sunny", icon: Sun },
-  { label: "Partly cloudy", icon: CloudSun },
-  { label: "Cloudy", icon: CloudFog },
-  { label: "Showers", icon: CloudRain },
-  { label: "Thunderstorm", icon: CloudLightning },
-  { label: "Clear", icon: Sun },
-];
-
-type DayForecast = {
-  date: string;
-  dayName: string;
-  icon: typeof Sun;
-  high: number;
-  low: number;
-  rain: number;
-  humidity: number;
-  wind: number;
-  label: string;
+type PageText = {
+  title: string;
+  subtitle: string;
+  location: string;
+  state: string;
+  district: string;
+  village: string;
+  selectState: string;
+  selectDistrict: string;
+  selectVillage: string;
+  getWeather: string;
+  loading: string;
+  temperature: string;
+  humidity: string;
+  wind: string;
+  rain: string;
+  sunny: string;
+  cloudy: string;
+  rainy: string;
+  thunderstorm: string;
+  bestCrop: string;
+  whyCrop: string;
+  advice: string;
+  irrigation: string;
+  fertilizer: string;
+  pest: string;
+  spraying: string;
+  live: string;
+  selectedLocation: string;
+  highRain: string;
+  normalIrrigation: string;
+  fertilizerAdvice: string;
+  pestAdvice: string;
+  highWindSpraying: string;
+  normalSpraying: string;
+  paddy: string;
+  wheat: string;
+  groundnut: string;
+  tomato: string;
+  paddyReason: string;
+  wheatReason: string;
+  groundnutReason: string;
+  tomatoReason: string;
+  weatherError: string;
 };
 
-function seedRandom(seed: string) {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) % 9973;
-  return () => {
-    h = (h * 9301 + 49297) % 233280;
-    return h / 233280;
+const pageText: Record<LanguageCode, PageText> = {
+  en: {
+    title: "Weather & Farming Advisory",
+    subtitle: "Check real weather and find the best crop for your location",
+    location: "Village Weather Forecast",
+    state: "State",
+    district: "District",
+    village: "Village",
+    selectState: "Select State",
+    selectDistrict: "Select District",
+    selectVillage: "Select Village",
+    getWeather: "Get Live Weather & Crop Recommendation",
+    loading: "Getting live weather...",
+    temperature: "Temperature",
+    humidity: "Humidity",
+    wind: "Wind",
+    rain: "Rain Chance",
+    sunny: "Sunny",
+    cloudy: "Partly Cloudy",
+    rainy: "Showers",
+    thunderstorm: "Thunderstorm",
+    bestCrop: "Best Crop for This Weather",
+    whyCrop: "Why this crop?",
+    advice: "Today's Farming Advice",
+    irrigation: "Irrigation",
+    fertilizer: "Fertilizer",
+    pest: "Pest / Disease",
+    spraying: "Spraying",
+    live: "Live weather data",
+    selectedLocation: "Selected Location",
+    highRain: "Reduce irrigation because rainfall probability is high.",
+    normalIrrigation:
+      "Use regular irrigation and avoid excess water.",
+    fertilizerAdvice:
+      "Apply fertilizer when heavy rain is not expected.",
+    pestAdvice:
+      "Check leaves regularly for pests and diseases.",
+    highWindSpraying:
+      "Avoid spraying because wind speed is high.",
+    normalSpraying:
+      "Avoid spraying during rain or strong wind.",
+    paddy: "Paddy",
+    wheat: "Wheat",
+    groundnut: "Groundnut",
+    tomato: "Tomato",
+    paddyReason:
+      "High rainfall probability and humidity can be suitable for paddy cultivation.",
+    wheatReason:
+      "Cooler temperatures and moderate rainfall can be suitable for wheat.",
+    groundnutReason:
+      "Warm and comparatively dry weather can be suitable for groundnut.",
+    tomatoReason:
+      "Warm weather with moderate rainfall can be suitable for tomato cultivation.",
+    weatherError:
+      "Unable to get live weather. Please check your internet connection and try again.",
+  },
+
+  te: {
+    title: "వాతావరణం మరియు వ్యవసాయ సలహా",
+    subtitle:
+      "మీ ప్రాంతంలోని నిజమైన వాతావరణాన్ని చూసి ఉత్తమ పంటను కనుగొనండి",
+    location: "గ్రామ వాతావరణ సూచన",
+    state: "రాష్ట్రం",
+    district: "జిల్లా",
+    village: "గ్రామం",
+    selectState: "రాష్ట్రాన్ని ఎంచుకోండి",
+    selectDistrict: "జిల్లాను ఎంచుకోండి",
+    selectVillage: "గ్రామాన్ని ఎంచుకోండి",
+    getWeather: "ప్రత్యక్ష వాతావరణం మరియు పంట సిఫార్సు పొందండి",
+    loading: "ప్రత్యక్ష వాతావరణాన్ని పొందుతోంది...",
+    temperature: "ఉష్ణోగ్రత",
+    humidity: "తేమ",
+    wind: "గాలి",
+    rain: "వర్షం అవకాశం",
+    sunny: "ఎండగా ఉంది",
+    cloudy: "పాక్షికంగా మేఘావృతం",
+    rainy: "జల్లులు",
+    thunderstorm: "ఉరుములతో కూడిన వర్షం",
+    bestCrop: "ఈ వాతావరణానికి ఉత్తమ పంట",
+    whyCrop: "ఈ పంట ఎందుకు?",
+    advice: "ఈరోజు వ్యవసాయ సలహా",
+    irrigation: "నీటిపారుదల",
+    fertilizer: "ఎరువులు",
+    pest: "పురుగు / వ్యాధి",
+    spraying: "పిచికారీ",
+    live: "ప్రత్యక్ష వాతావరణ సమాచారం",
+    selectedLocation: "ఎంచుకున్న ప్రాంతం",
+    highRain:
+      "వర్షం అవకాశం ఎక్కువగా ఉన్నందున నీటిపారుదలను తగ్గించండి.",
+    normalIrrigation:
+      "క్రమం తప్పకుండా నీటిపారుదల చేయండి మరియు అధిక నీటిని నివారించండి.",
+    fertilizerAdvice:
+      "భారీ వర్షం లేని సమయంలో ఎరువులు వేయండి.",
+    pestAdvice:
+      "పురుగులు మరియు వ్యాధుల కోసం ఆకులను క్రమం తప్పకుండా పరిశీలించండి.",
+    highWindSpraying:
+      "గాలి వేగం ఎక్కువగా ఉన్నందున పిచికారీ చేయవద్దు.",
+    normalSpraying:
+      "వర్షం లేదా బలమైన గాలి సమయంలో పిచికారీ చేయవద్దు.",
+    paddy: "వరి",
+    wheat: "గోధుమ",
+    groundnut: "వేరుశెనగ",
+    tomato: "టమాటా",
+    paddyReason:
+      "ఎక్కువ వర్షం అవకాశం మరియు తేమ వరి సాగుకు అనుకూలంగా ఉండవచ్చు.",
+    wheatReason:
+      "చల్లని ఉష్ణోగ్రతలు మరియు మితమైన వర్షం గోధుమకు అనుకూలంగా ఉండవచ్చు.",
+    groundnutReason:
+      "వెచ్చని మరియు తక్కువ వర్షపాతం ఉన్న వాతావరణం వేరుశెనగకు అనుకూలంగా ఉండవచ్చు.",
+    tomatoReason:
+      "వెచ్చని వాతావరణం మరియు మితమైన వర్షం టమాటాకు అనుకూలంగా ఉండవచ్చు.",
+    weatherError:
+      "ప్రత్యక్ష వాతావరణాన్ని పొందలేకపోయాము. ఇంటర్నెట్ కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.",
+  },
+
+  hi: {
+    title: "मौसम और कृषि सलाह",
+    subtitle:
+      "अपने क्षेत्र का वास्तविक मौसम देखें और सबसे अच्छी फसल खोजें",
+    location: "गांव का मौसम पूर्वानुमान",
+    state: "राज्य",
+    district: "जिला",
+    village: "गांव",
+    selectState: "राज्य चुनें",
+    selectDistrict: "जिला चुनें",
+    selectVillage: "गांव चुनें",
+    getWeather: "लाइव मौसम और फसल की सिफारिश देखें",
+    loading: "लाइव मौसम प्राप्त किया जा रहा है...",
+    temperature: "तापमान",
+    humidity: "नमी",
+    wind: "हवा",
+    rain: "बारिश की संभावना",
+    sunny: "धूप",
+    cloudy: "आंशिक बादल",
+    rainy: "बारिश",
+    thunderstorm: "आंधी और बारिश",
+    bestCrop: "इस मौसम के लिए सबसे अच्छी फसल",
+    whyCrop: "यह फसल क्यों?",
+    advice: "आज की कृषि सलाह",
+    irrigation: "सिंचाई",
+    fertilizer: "उर्वरक",
+    pest: "कीट / रोग",
+    spraying: "छिड़काव",
+    live: "लाइव मौसम की जानकारी",
+    selectedLocation: "चयनित स्थान",
+    highRain: "अधिक बारिश की संभावना के कारण सिंचाई कम करें।",
+    normalIrrigation:
+      "नियमित सिंचाई करें और अधिक पानी से बचें।",
+    fertilizerAdvice:
+      "भारी बारिश की संभावना न होने पर उर्वरक डालें।",
+    pestAdvice:
+      "कीट और रोगों के लिए पत्तियों की नियमित जांच करें।",
+    highWindSpraying:
+      "हवा की गति अधिक होने के कारण छिड़काव न करें।",
+    normalSpraying:
+      "बारिश या तेज हवा के दौरान छिड़काव न करें।",
+    paddy: "धान",
+    wheat: "गेहूं",
+    groundnut: "मूंगफली",
+    tomato: "टमाटर",
+    paddyReason:
+      "अधिक बारिश की संभावना और नमी धान की खेती के लिए उपयुक्त हो सकती है।",
+    wheatReason:
+      "ठंडा तापमान और मध्यम वर्षा गेहूं के लिए उपयुक्त हो सकती है।",
+    groundnutReason:
+      "गर्म और अपेक्षाकृत शुष्क मौसम मूंगफली के लिए उपयुक्त हो सकता है।",
+    tomatoReason:
+      "गर्म मौसम और मध्यम वर्षा टमाटर के लिए उपयुक्त हो सकती है।",
+    weatherError:
+      "लाइव मौसम प्राप्त नहीं हो सका। इंटरनेट कनेक्शन जांचें और फिर प्रयास करें।",
+  },
+
+  ta: {
+    title: "வானிலை மற்றும் விவசாய ஆலோசனை",
+    subtitle:
+      "உங்கள் பகுதியின் உண்மையான வானிலையை பார்த்து சிறந்த பயிரை தேர்வு செய்யுங்கள்",
+    location: "கிராம வானிலை முன்னறிவிப்பு",
+    state: "மாநிலம்",
+    district: "மாவட்டம்",
+    village: "கிராமம்",
+    selectState: "மாநிலத்தை தேர்வு செய்யவும்",
+    selectDistrict: "மாவட்டத்தை தேர்வு செய்யவும்",
+    selectVillage: "கிராமத்தை தேர்வு செய்யவும்",
+    getWeather: "நேரடி வானிலை மற்றும் பயிர் பரிந்துரையை பெறவும்",
+    loading: "நேரடி வானிலை தகவலை பெறுகிறது...",
+    temperature: "வெப்பநிலை",
+    humidity: "ஈரப்பதம்",
+    wind: "காற்று",
+    rain: "மழை வாய்ப்பு",
+    sunny: "வெயில்",
+    cloudy: "பகுதி மேகமூட்டம்",
+    rainy: "மழை",
+    thunderstorm: "இடியுடன் கூடிய மழை",
+    bestCrop: "இந்த வானிலைக்கு சிறந்த பயிர்",
+    whyCrop: "இந்த பயிர் ஏன்?",
+    advice: "இன்றைய விவசாய ஆலோசனை",
+    irrigation: "நீர்ப்பாசனம்",
+    fertilizer: "உரம்",
+    pest: "பூச்சி / நோய்",
+    spraying: "தெளித்தல்",
+    live: "நேரடி வானிலை தகவல்",
+    selectedLocation: "தேர்ந்தெடுக்கப்பட்ட இடம்",
+    highRain:
+      "மழை வாய்ப்பு அதிகமாக இருப்பதால் நீர்ப்பாசனத்தை குறைக்கவும்.",
+    normalIrrigation:
+      "வழக்கமான நீர்ப்பாசனம் செய்யவும் மற்றும் அதிக நீரை தவிர்க்கவும்.",
+    fertilizerAdvice:
+      "கனமழை எதிர்பார்க்கப்படாத போது உரம் இடவும்.",
+    pestAdvice:
+      "பூச்சிகள் மற்றும் நோய்களுக்காக இலைகளை தொடர்ந்து சரிபார்க்கவும்.",
+    highWindSpraying:
+      "காற்றின் வேகம் அதிகமாக இருப்பதால் தெளிக்க வேண்டாம்.",
+    normalSpraying:
+      "மழை அல்லது பலத்த காற்றின் போது தெளிக்க வேண்டாம்.",
+    paddy: "நெல்",
+    wheat: "கோதுமை",
+    groundnut: "நிலக்கடலை",
+    tomato: "தக்காளி",
+    paddyReason:
+      "அதிக மழை வாய்ப்பு மற்றும் ஈரப்பதம் நெல் சாகுபடிக்கு ஏற்றதாக இருக்கலாம்.",
+    wheatReason:
+      "குளிர்ந்த வெப்பநிலை மற்றும் மிதமான மழை கோதுமைக்கு ஏற்றதாக இருக்கலாம்.",
+    groundnutReason:
+      "வெப்பமான மற்றும் ஒப்பீட்டளவில் வறண்ட வானிலை நிலக்கடலைக்கு ஏற்றதாக இருக்கலாம்.",
+    tomatoReason:
+      "வெப்பமான வானிலை மற்றும் மிதமான மழை தக்காளிக்கு ஏற்றதாக இருக்கலாம்.",
+    weatherError:
+      "நேரடி வானிலை தகவலை பெற முடியவில்லை. இணைய இணைப்பை சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
+  },
+
+  kn: {
+    title: "ಹವಾಮಾನ ಮತ್ತು ಕೃಷಿ ಸಲಹೆ",
+    subtitle:
+      "ನಿಮ್ಮ ಪ್ರದೇಶದ ನೈಜ ಹವಾಮಾನವನ್ನು ನೋಡಿ ಉತ್ತಮ ಬೆಳೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    location: "ಗ್ರಾಮ ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ",
+    state: "ರಾಜ್ಯ",
+    district: "ಜಿಲ್ಲೆ",
+    village: "ಗ್ರಾಮ",
+    selectState: "ರಾಜ್ಯ ಆಯ್ಕೆಮಾಡಿ",
+    selectDistrict: "ಜಿಲ್ಲೆ ಆಯ್ಕೆಮಾಡಿ",
+    selectVillage: "ಗ್ರಾಮ ಆಯ್ಕೆಮಾಡಿ",
+    getWeather: "ಲೈವ್ ಹವಾಮಾನ ಮತ್ತು ಬೆಳೆ ಶಿಫಾರಸು ಪಡೆಯಿರಿ",
+    loading: "ಲೈವ್ ಹವಾಮಾನ ಪಡೆಯಲಾಗುತ್ತಿದೆ...",
+    temperature: "ತಾಪಮಾನ",
+    humidity: "ಆರ್ದ್ರತೆ",
+    wind: "ಗಾಳಿ",
+    rain: "ಮಳೆಯ ಸಾಧ್ಯತೆ",
+    sunny: "ಬಿಸಿಲು",
+    cloudy: "ಭಾಗಶಃ ಮೋಡ",
+    rainy: "ಮಳೆ",
+    thunderstorm: "ಗುಡುಗು ಸಹಿತ ಮಳೆ",
+    bestCrop: "ಈ ಹವಾಮಾನಕ್ಕೆ ಉತ್ತಮ ಬೆಳೆ",
+    whyCrop: "ಈ ಬೆಳೆ ಏಕೆ?",
+    advice: "ಇಂದಿನ ಕೃಷಿ ಸಲಹೆ",
+    irrigation: "ನೀರಾವರಿ",
+    fertilizer: "ರಸಗೊಬ್ಬರ",
+    pest: "ಕೀಟ / ರೋಗ",
+    spraying: "ಸಿಂಪಡಿಸುವಿಕೆ",
+    live: "ಲೈವ್ ಹವಾಮಾನ ಮಾಹಿತಿ",
+    selectedLocation: "ಆಯ್ಕೆ ಮಾಡಿದ ಸ್ಥಳ",
+    highRain: "ಹೆಚ್ಚಿನ ಮಳೆಯ ಸಾಧ್ಯತೆಯಿಂದ ನೀರಾವರಿಯನ್ನು ಕಡಿಮೆ ಮಾಡಿ.",
+    normalIrrigation:
+      "ನಿಯಮಿತ ನೀರಾವರಿ ಮಾಡಿ ಮತ್ತು ಹೆಚ್ಚಿನ ನೀರನ್ನು ತಪ್ಪಿಸಿ.",
+    fertilizerAdvice:
+      "ಭಾರಿ ಮಳೆ ನಿರೀಕ್ಷಿಸದ ಸಮಯದಲ್ಲಿ ರಸಗೊಬ್ಬರ ಹಾಕಿ.",
+    pestAdvice:
+      "ಕೀಟಗಳು ಮತ್ತು ರೋಗಗಳಿಗಾಗಿ ಎಲೆಗಳನ್ನು ನಿಯಮಿತವಾಗಿ ಪರಿಶೀಲಿಸಿ.",
+    highWindSpraying:
+      "ಗಾಳಿಯ ವೇಗ ಹೆಚ್ಚಿರುವುದರಿಂದ ಸಿಂಪಡಿಸಬೇಡಿ.",
+    normalSpraying:
+      "ಮಳೆ ಅಥವಾ ಬಲವಾದ ಗಾಳಿಯ ಸಮಯದಲ್ಲಿ ಸಿಂಪಡಿಸಬೇಡಿ.",
+    paddy: "ಭತ್ತ",
+    wheat: "ಗೋಧಿ",
+    groundnut: "ಕಡಲೆಕಾಯಿ",
+    tomato: "ಟೊಮ್ಯಾಟೊ",
+    paddyReason:
+      "ಹೆಚ್ಚಿನ ಮಳೆಯ ಸಾಧ್ಯತೆ ಮತ್ತು ತೇವಾಂಶ ಭತ್ತದ ಬೆಳೆಗೆ ಸೂಕ್ತವಾಗಿರಬಹುದು.",
+    wheatReason:
+      "ತಂಪಾದ ತಾಪಮಾನ ಮತ್ತು ಮಧ್ಯಮ ಮಳೆ ಗೋಧಿಗೆ ಸೂಕ್ತವಾಗಿರಬಹುದು.",
+    groundnutReason:
+      "ಬೆಚ್ಚಗಿನ ಮತ್ತು ತುಲನಾತ್ಮಕವಾಗಿ ಒಣ ಹವಾಮಾನ ಕಡಲೆಕಾಯಿಗೆ ಸೂಕ್ತವಾಗಿರಬಹುದು.",
+    tomatoReason:
+      "ಬೆಚ್ಚಗಿನ ಹವಾಮಾನ ಮತ್ತು ಮಧ್ಯಮ ಮಳೆ ಟೊಮ್ಯಾಟೊ ಬೆಳೆಗೆ ಸೂಕ್ತವಾಗಿರಬಹುದು.",
+    weatherError:
+      "ಲೈವ್ ಹವಾಮಾನ ಪಡೆಯಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+  },
+
+  mr: {
+    title: "हवामान आणि शेती सल्ला",
+    subtitle:
+      "तुमच्या भागातील वास्तविक हवामान पाहून सर्वोत्तम पीक निवडा",
+    location: "गावाचा हवामान अंदाज",
+    state: "राज्य",
+    district: "जिल्हा",
+    village: "गाव",
+    selectState: "राज्य निवडा",
+    selectDistrict: "जिल्हा निवडा",
+    selectVillage: "गाव निवडा",
+    getWeather: "लाइव्ह हवामान आणि पीक शिफारस मिळवा",
+    loading: "लाइव्ह हवामान मिळवत आहे...",
+    temperature: "तापमान",
+    humidity: "आर्द्रता",
+    wind: "वारा",
+    rain: "पावसाची शक्यता",
+    sunny: "सनी",
+    cloudy: "अंशतः ढगाळ",
+    rainy: "पाऊस",
+    thunderstorm: "वादळी पाऊस",
+    bestCrop: "या हवामानासाठी सर्वोत्तम पीक",
+    whyCrop: "हे पीक का?",
+    advice: "आजचा शेती सल्ला",
+    irrigation: "सिंचन",
+    fertilizer: "खत",
+    pest: "कीड / रोग",
+    spraying: "फवारणी",
+    live: "लाइव्ह हवामान माहिती",
+    selectedLocation: "निवडलेले ठिकाण",
+    highRain: "जास्त पावसाच्या शक्यतेमुळे सिंचन कमी करा.",
+    normalIrrigation:
+      "नियमित सिंचन करा आणि जास्त पाणी टाळा.",
+    fertilizerAdvice:
+      "जोरदार पाऊस अपेक्षित नसताना खत द्या.",
+    pestAdvice:
+      "कीड आणि रोगांसाठी पानांची नियमित तपासणी करा.",
+    highWindSpraying:
+      "वाऱ्याचा वेग जास्त असल्याने फवारणी करू नका.",
+    normalSpraying:
+      "पाऊस किंवा जोरदार वाऱ्याच्या वेळी फवारणी करू नका.",
+    paddy: "भात",
+    wheat: "गहू",
+    groundnut: "भुईमूग",
+    tomato: "टोमॅटो",
+    paddyReason:
+      "जास्त पावसाची शक्यता आणि आर्द्रता भातासाठी योग्य असू शकते.",
+    wheatReason:
+      "थंड तापमान आणि मध्यम पाऊस गव्हासाठी योग्य असू शकतो.",
+    groundnutReason:
+      "उबदार आणि तुलनेने कोरडे हवामान भुईमुगासाठी योग्य असू शकते.",
+    tomatoReason:
+      "उबदार हवामान आणि मध्यम पाऊस टोमॅटोसाठी योग्य असू शकतो.",
+    weatherError:
+      "लाइव्ह हवामान मिळवता आले नाही. इंटरनेट कनेक्शन तपासा आणि पुन्हा प्रयत्न करा.",
+  },
+
+  bn: {
+    title: "আবহাওয়া ও কৃষি পরামর্শ",
+    subtitle:
+      "আপনার এলাকার বাস্তব আবহাওয়া দেখে সেরা ফসল নির্বাচন করুন",
+    location: "গ্রামের আবহাওয়ার পূর্বাভাস",
+    state: "রাজ্য",
+    district: "জেলা",
+    village: "গ্রাম",
+    selectState: "রাজ্য নির্বাচন করুন",
+    selectDistrict: "জেলা নির্বাচন করুন",
+    selectVillage: "গ্রাম নির্বাচন করুন",
+    getWeather: "লাইভ আবহাওয়া ও ফসলের সুপারিশ দেখুন",
+    loading: "লাইভ আবহাওয়া পাওয়া যাচ্ছে...",
+    temperature: "তাপমাত্রা",
+    humidity: "আর্দ্রতা",
+    wind: "বাতাস",
+    rain: "বৃষ্টির সম্ভাবনা",
+    sunny: "রৌদ্রোজ্জ্বল",
+    cloudy: "আংশিক মেঘলা",
+    rainy: "বৃষ্টি",
+    thunderstorm: "বজ্রসহ বৃষ্টি",
+    bestCrop: "এই আবহাওয়ার জন্য সেরা ফসল",
+    whyCrop: "এই ফসল কেন?",
+    advice: "আজকের কৃষি পরামর্শ",
+    irrigation: "সেচ",
+    fertilizer: "সার",
+    pest: "পোকা / রোগ",
+    spraying: "স্প্রে",
+    live: "লাইভ আবহাওয়ার তথ্য",
+    selectedLocation: "নির্বাচিত স্থান",
+    highRain: "অতিরিক্ত বৃষ্টির সম্ভাবনার কারণে সেচ কমিয়ে দিন।",
+    normalIrrigation:
+      "নিয়মিত সেচ দিন এবং অতিরিক্ত জল এড়িয়ে চলুন।",
+    fertilizerAdvice:
+      "ভারী বৃষ্টির সম্ভাবনা না থাকলে সার প্রয়োগ করুন।",
+    pestAdvice:
+      "পোকামাকড় ও রোগের জন্য নিয়মিত পাতা পরীক্ষা করুন।",
+    highWindSpraying:
+      "বাতাসের গতি বেশি হওয়ায় স্প্রে করবেন না।",
+    normalSpraying:
+      "বৃষ্টি বা প্রবল বাতাসের সময় স্প্রে করবেন না।",
+    paddy: "ধান",
+    wheat: "গম",
+    groundnut: "চিনাবাদাম",
+    tomato: "টমেটো",
+    paddyReason:
+      "উচ্চ বৃষ্টির সম্ভাবনা ও আর্দ্রতা ধান চাষের জন্য উপযুক্ত হতে পারে।",
+    wheatReason:
+      "ঠান্ডা তাপমাত্রা ও মাঝারি বৃষ্টিপাত গমের জন্য উপযুক্ত হতে পারে।",
+    groundnutReason:
+      "উষ্ণ ও তুলনামূলক শুষ্ক আবহাওয়া চিনাবাদামের জন্য উপযুক্ত হতে পারে।",
+    tomatoReason:
+      "উষ্ণ আবহাওয়া ও মাঝারি বৃষ্টিপাত টমেটোর জন্য উপযুক্ত হতে পারে।",
+    weatherError:
+      "লাইভ আবহাওয়া পাওয়া যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
+  },
+};
+
+/* =========================================================
+   LOCATION DATA
+========================================================= */
+
+type LocalizedName = Record<LanguageCode, string>;
+
+type VillageItem = {
+  name: LocalizedName;
+  searchName: string;
+};
+
+type DistrictItem = {
+  name: LocalizedName;
+  searchName: string;
+  villages: VillageItem[];
+};
+
+type LocationItem = {
+  name: LocalizedName;
+  searchName: string;
+  districts: DistrictItem[];
+};
+
+const n = (
+  en: string,
+  te: string,
+  hi: string,
+  ta: string,
+  kn: string,
+  mr: string,
+  bn: string,
+): LocalizedName => ({
+  en,
+  te,
+  hi,
+  ta,
+  kn,
+  mr,
+  bn,
+});
+
+const village = (
+  en: string,
+  te: string,
+  hi: string,
+  ta: string,
+  kn: string,
+  mr: string,
+  bn: string,
+): VillageItem => ({
+  name: n(en, te, hi, ta, kn, mr, bn),
+  searchName: en,
+});
+
+const district = (
+  en: string,
+  te: string,
+  hi: string,
+  ta: string,
+  kn: string,
+  mr: string,
+  bn: string,
+  villages: VillageItem[],
+): DistrictItem => ({
+  name: n(en, te, hi, ta, kn, mr, bn),
+  searchName: en,
+  villages,
+});
+
+const locations: LocationItem[] = [
+  {
+    name: n(
+      "Tamil Nadu",
+      "తమిళనాడు",
+      "तमिलनाडु",
+      "தமிழ்நாடு",
+      "ತಮಿಳುನಾಡು",
+      "तमिळनाडू",
+      "তামিলনাড়ু",
+    ),
+    searchName: "Tamil Nadu",
+    districts: [
+      district(
+        "Madurai",
+        "మదురై",
+        "मदुरै",
+        "மதுரை",
+        "ಮದುರೈ",
+        "मदुराई",
+        "মাদুরাই",
+        [
+          village(
+            "Melur",
+            "మెలూర్",
+            "मेलूर",
+            "மேலூர்",
+            "ಮೇಲೂರು",
+            "मेलूर",
+            "মেলুর",
+          ),
+          village(
+            "Usilampatti",
+            "ఉసిలంపట్టి",
+            "उसिलमपट्टी",
+            "உசிலம்பட்டி",
+            "ಉಸಿಲಂಪಟ್ಟಿ",
+            "उसिलमपट्टी",
+            "উসিলামপট্টি",
+          ),
+          village(
+            "Thirumangalam",
+            "తిరుమంగళం",
+            "तिरुमंगलम",
+            "திருமங்கலம்",
+            "ತಿರುಮಂಗಲಂ",
+            "तिरुमंगलम",
+            "তিরুমঙ্গলম",
+          ),
+        ],
+      ),
+      district(
+        "Virudhunagar",
+        "విరుదునగర్",
+        "विरुधुनगर",
+        "விருதுநகர்",
+        "ವಿರುದುನಗರ",
+        "विरुधुनगर",
+        "বিরুধুনগর",
+        [
+          village(
+            "Srivilliputtur",
+            "శ్రీవిల్లిపుత్తూరు",
+            "श्रीविल्लिपुत्तूर",
+            "ஸ்ரீவில்லிபுத்தூர்",
+            "ಶ್ರೀವಿಲ್ಲಿಪುತ್ತೂರು",
+            "श्रीविल्लिपुत्तूर",
+            "শ্রীভিল্লিপুত্তুর",
+          ),
+          village(
+            "Rajapalayam",
+            "రాజపాళయం",
+            "राजपालायम",
+            "ராஜபாளையம்",
+            "ರಾಜಪಾಳಯಂ",
+            "राजपालायम",
+            "রাজাপালায়ম",
+          ),
+          village(
+            "Sivakasi",
+            "శివకాశి",
+            "शिवकाशी",
+            "சிவகாசி",
+            "ಶಿವಕಾಶಿ",
+            "शिवकाशी",
+            "শিবকাশী",
+          ),
+        ],
+      ),
+      district(
+        "Coimbatore",
+        "కోయంబత్తూరు",
+        "कोयंबटूर",
+        "கோயம்புத்தூர்",
+        "ಕೊಯಮತ್ತೂರು",
+        "कोयंबतूर",
+        "কোয়েম্বাটুর",
+        [
+          village(
+            "Pollachi",
+            "పొల్లాచి",
+            "पोल्लाची",
+            "பொள்ளாச்சி",
+            "ಪೊಲ್ಲಾಚಿ",
+            "पोल्लाची",
+            "পোল্লাচি",
+          ),
+          village(
+            "Mettupalayam",
+            "మెట్టుపాళయం",
+            "मेट्टुपालयम",
+            "மேட்டுப்பாளையம்",
+            "ಮೆಟ್ಟுப்பಾಳಯಂ",
+            "मेट्टुपालयम",
+            "মেট্টুপালায়ম",
+          ),
+          village(
+            "Sulur",
+            "సూలూర్",
+            "सुलूर",
+            "சூலூர்",
+            "ಸೂಲೂರು",
+            "सुलूर",
+            "সুলুর",
+          ),
+        ],
+      ),
+    ],
+  },
+
+  {
+    name: n(
+      "Maharashtra",
+      "మహారాష్ట్ర",
+      "महाराष्ट्र",
+      "மகாராஷ்டிரா",
+      "ಮಹಾರಾಷ್ಟ್ರ",
+      "महाराष्ट्र",
+      "মহারাষ্ট্র",
+    ),
+    searchName: "Maharashtra",
+    districts: [
+      district(
+        "Nashik",
+        "నాసిక్",
+        "नासिक",
+        "நாசிக்",
+        "ನಾಸಿಕ್",
+        "नाशिक",
+        "নাসিক",
+        [
+          village(
+            "Nashik",
+            "నాసిక్",
+            "नासिक",
+            "நாசிக்",
+            "ನಾಸಿಕ್",
+            "नाशिक",
+            "নাসিক",
+          ),
+          village(
+            "Sinnar",
+            "సిన్నార్",
+            "सिन्नर",
+            "சின்னர்",
+            "ಸಿನ್ನರ್",
+            "सिन्नर",
+            "সিন্নার",
+          ),
+          village(
+            "Yeola",
+            "యేవ్లా",
+            "येवला",
+            "யேவ்லா",
+            "ಯೇವ್ಲಾ",
+            "येवला",
+            "ইয়েওলা",
+          ),
+        ],
+      ),
+      district(
+        "Pune",
+        "పూణే",
+        "पुणे",
+        "புனே",
+        "ಪುಣೆ",
+        "पुणे",
+        "পুনে",
+        [
+          village(
+            "Baramati",
+            "బారామతి",
+            "बारामती",
+            "பாராமதி",
+            "ಬಾರಾಮತಿ",
+            "बारामती",
+            "বারামতি",
+          ),
+          village(
+            "Haveli",
+            "హవేలీ",
+            "हवेली",
+            "ஹவேலி",
+            "ಹವೇಲಿ",
+            "हवेली",
+            "হাভেলি",
+          ),
+          village(
+            "Mulshi",
+            "ముల్షీ",
+            "मुळशी",
+            "முல்ஷி",
+            "ಮುಳ್ಶಿ",
+            "मुळशी",
+            "মুলশি",
+          ),
+        ],
+      ),
+      district(
+        "Nagpur",
+        "నాగ్‌పూర్",
+        "नागपुर",
+        "நாக்பூர்",
+        "ನಾಗ್ಪುರ",
+        "नागपूर",
+        "নাগপুর",
+        [
+          village(
+            "Katol",
+            "కటోల్",
+            "कटोल",
+            "கடோல்",
+            "ಕಟೋಲ್",
+            "काटोल",
+            "কাটোল",
+          ),
+          village(
+            "Kamptee",
+            "కాంప్టీ",
+            "कामठी",
+            "காம்ப்டீ",
+            "ಕಾಂಪ್ಟೀ",
+            "कामठी",
+            "কামটি",
+          ),
+          village(
+            "Hingna",
+            "హింగ్నా",
+            "हिंगना",
+            "ஹிங்னா",
+            "ಹಿಂಗ್ನಾ",
+            "हिंगणा",
+            "হিংনা",
+          ),
+        ],
+      ),
+    ],
+  },
+
+  {
+    name: n(
+      "Telangana",
+      "తెలంగాణ",
+      "तेलंगाना",
+      "தெலங்கானா",
+      "ತೆಲಂಗಾಣ",
+      "तेलंगणा",
+      "তেলেঙ্গানা",
+    ),
+    searchName: "Telangana",
+    districts: [
+      district(
+        "Hyderabad",
+        "హైదరాబాద్",
+        "हैदराबाद",
+        "ஹைதராபாத்",
+        "ಹೈದರಾಬಾದ್",
+        "हैदराबाद",
+        "হায়দ্রাবাদ",
+        [
+          village(
+            "Hyderabad",
+            "హైదరాబాద్",
+            "हैदराबाद",
+            "ஹைதராபாத்",
+            "ಹೈದರಾಬಾದ್",
+            "हैदराबाद",
+            "হায়দ্রাবাদ",
+          ),
+          village(
+            "Shamshabad",
+            "శంషాబాద్",
+            "शमशाबाद",
+            "ஷம்ஷாபாத்",
+            "ಶಂಶಾಬಾದ್",
+            "शमशाबाद",
+            "শামশাবাদ",
+          ),
+          village(
+            "Medchal",
+            "మెద్చల్",
+            "मेडचल",
+            "மேட்சல்",
+            "ಮೆಡ್ಚಲ್",
+            "मेडचल",
+            "মেডচাল",
+          ),
+        ],
+      ),
+      district(
+        "Warangal",
+        "వరంగల్",
+        "वारंगल",
+        "வாரங்கல்",
+        "ವಾರಂಗಲ್",
+        "वारंगल",
+        "ওয়ারাঙ্গল",
+        [
+          village(
+            "Warangal",
+            "వరంగల్",
+            "वारंगल",
+            "வாரங்கல்",
+            "ವಾರಂಗಲ್",
+            "वारंगल",
+            "ওয়ারাঙ্গল",
+          ),
+          village(
+            "Parkal",
+            "పరకాల",
+            "पारकल",
+            "பர்கல்",
+            "ಪಾರ್ಕಲ್",
+            "पारकल",
+            "পারকাল",
+          ),
+          village(
+            "Narsampet",
+            "నర్సంపేట్",
+            "नरसंपेट",
+            "நரசம்பேட்",
+            "ನರಸಂಪೇಟೆ",
+            "नरसंपेट",
+            "নরসামপেট",
+          ),
+        ],
+      ),
+      district(
+        "Nalgonda",
+        "నల్గొండ",
+        "नलगोंडा",
+        "நல்கொண்டா",
+        "ನಲ್ಗೊಂಡ",
+        "नलगोंडा",
+        "নালগোন্ডা",
+        [
+          village(
+            "Nalgonda",
+            "నల్గొండ",
+            "नलगोंडा",
+            "நல்கொண்டா",
+            "ನಲ್ಗೊಂಡ",
+            "नलगोंडा",
+            "নালগোন্ডা",
+          ),
+          village(
+            "Miryalaguda",
+            "మిర్యాలగూడ",
+            "मिर्यालगुडा",
+            "மிரியாலகுடா",
+            "ಮಿರಿಯಾಲಗುಡ",
+            "मिर्यालगुडा",
+            "মিরিয়ালগুডা",
+          ),
+          village(
+            "Devarakonda",
+            "దేవరకొండ",
+            "देवरकोंडा",
+            "தேவரகொண்டா",
+            "ದೇವರಕೊಂಡ",
+            "देवरकोंडा",
+            "দেবরাকোন্ডা",
+          ),
+        ],
+      ),
+    ],
+  },
+
+  {
+    name: n(
+      "Andhra Pradesh",
+      "ఆంధ్రప్రదేశ్",
+      "आंध्र प्रदेश",
+      "ஆந்திரப் பிரதேசம்",
+      "ಆಂಧ್ರ ಪ್ರದೇಶ",
+      "आंध्र प्रदेश",
+      "অন্ধ্রপ্রদেশ",
+    ),
+    searchName: "Andhra Pradesh",
+    districts: [
+      district(
+        "Guntur",
+        "గుంటూరు",
+        "गुंटूर",
+        "குண்டூர்",
+        "ಗುಂಟೂರು",
+        "गुंटूर",
+        "গুন্টুর",
+        [
+          village(
+            "Guntur",
+            "గుంటూరు",
+            "गुंटूर",
+            "குண்டூர்",
+            "ಗುಂಟೂರು",
+            "गुंटूर",
+            "গুন্টুর",
+          ),
+          village(
+            "Tenali",
+            "తెనాలి",
+            "तेनाली",
+            "தெனாலி",
+            "ತೆನಾಲಿ",
+            "तेनाली",
+            "তেনালি",
+          ),
+          village(
+            "Mangalagiri",
+            "మంగళగిరి",
+            "मंगलगिरि",
+            "மங்களகிரி",
+            "ಮಂಗಳಗಿರಿ",
+            "मंगलगिरी",
+            "মঙ্গলগিরি",
+          ),
+        ],
+      ),
+      district(
+        "Vijayawada",
+        "విజయవాడ",
+        "विजयवाड़ा",
+        "விஜயவாடா",
+        "ವಿಜಯವಾಡ",
+        "विजयवाडा",
+        "বিজয়ওয়াড়া",
+        [
+          village(
+            "Vijayawada",
+            "విజయవాడ",
+            "विजयवाड़ा",
+            "விஜயவாடா",
+            "ವಿಜಯವಾಡ",
+            "विजयवाडा",
+            "বিজয়ওয়াড়া",
+          ),
+          village(
+            "Nandigama",
+            "నందిగామ",
+            "नंदीगामा",
+            "நந்திகாமா",
+            "ನಂದಿಗಾಮ",
+            "नंदीगामा",
+            "নন্দিগামা",
+          ),
+          village(
+            "Ibrahimpatnam",
+            "ఇబ్రహీంపట్నం",
+            "इब्राहिमपट्टनम",
+            "இப்ராஹிம்பட்டணம்",
+            "ಇಬ್ರಾಹಿಂಪಟ್ಟಣಂ",
+            "इब्राहिमपट्टणम",
+            "ইব্রাহিমপাটনাম",
+          ),
+        ],
+      ),
+      district(
+        "Tirupati",
+        "తిరుపతి",
+        "तिरुपति",
+        "திருப்பதி",
+        "ತಿರುಪತಿ",
+        "तिरुपती",
+        "তিরুপতি",
+        [
+          village(
+            "Tirupati",
+            "తిరుపతి",
+            "तिरुपति",
+            "திருப்பதி",
+            "ತಿರುಪತಿ",
+            "तिरुपती",
+            "তিরুপতি",
+          ),
+          village(
+            "Renigunta",
+            "రేణిగుంట",
+            "रेणिगुंटा",
+            "ரேணிகுண்டா",
+            "ರೇಣಿಗುಂಟ",
+            "रेणिगुंटा",
+            "রেনিগুন্টা",
+          ),
+          village(
+            "Chandragiri",
+            "చంద్రగిరి",
+            "चंद्रगिरि",
+            "சந்திரகிரி",
+            "ಚಂದ್ರಗಿರಿ",
+            "चंद्रगिरी",
+            "চন্দ্রগিরি",
+          ),
+        ],
+      ),
+    ],
+  },
+
+  {
+    name: n(
+      "Karnataka",
+      "కర్ణాటక",
+      "कर्नाटक",
+      "கர்நாடகா",
+      "ಕರ್ನಾಟಕ",
+      "कर्नाटक",
+      "কর্ণাটক",
+    ),
+    searchName: "Karnataka",
+    districts: [
+      district(
+        "Bengaluru",
+        "బెంగళూరు",
+        "बेंगलुरु",
+        "பெங்களூரு",
+        "ಬೆಂಗಳೂರು",
+        "बेंगळुरू",
+        "বেঙ্গালুরু",
+        [
+          village(
+            "Bengaluru",
+            "బెంగళూరు",
+            "बेंगलुरु",
+            "பெங்களூரு",
+            "ಬೆಂಗಳೂರು",
+            "बेंगळुरू",
+            "বেঙ্গালুরু",
+          ),
+          village(
+            "Anekal",
+            "ఆనేకల్",
+            "अनेकल",
+            "ஆனேக்கல்",
+            "ಆನೇಕಲ್",
+            "अनेकल",
+            "আনেকাল",
+          ),
+          village(
+            "Devanahalli",
+            "దేవనహళ్లి",
+            "देवनहल्ली",
+            "தேவனஹள்ளி",
+            "ದೇವನಹಳ್ಳಿ",
+            "देवनहळ्ळी",
+            "দেবনাহাল্লি",
+          ),
+        ],
+      ),
+      district(
+        "Mysuru",
+        "మైసూరు",
+        "मैसूर",
+        "மைசூர்",
+        "ಮೈಸೂರು",
+        "म्हैसूर",
+        "মাইসুরু",
+        [
+          village(
+            "Mysuru",
+            "మైసూరు",
+            "मैसूर",
+            "மைசூர்",
+            "ಮೈಸೂರು",
+            "म्हैसूर",
+            "মাইসুরু",
+          ),
+          village(
+            "Nanjangud",
+            "నంజనగూడు",
+            "नंजनगुड",
+            "நஞ்சன்கூடு",
+            "ನಂಜನಗೂಡು",
+            "नंजनगुड",
+            "নানজানগুড",
+          ),
+          village(
+            "Hunsur",
+            "హున్సూర్",
+            "हुनसूर",
+            "ஹுன்சூர்",
+            "ಹುಣಸೂರು",
+            "हुनसूर",
+            "হুনসুর",
+          ),
+        ],
+      ),
+      district(
+        "Belagavi",
+        "బెలగావి",
+        "बेळगावी",
+        "பெலகாவி",
+        "ಬೆಳಗಾವಿ",
+        "बेळगाव",
+        "বেলাগাভি",
+        [
+          village(
+            "Belagavi",
+            "బెలగావి",
+            "बेळगावी",
+            "பெலகாவி",
+            "ಬೆಳಗಾವಿ",
+            "बेळगाव",
+            "বেলাগাভি",
+          ),
+          village(
+            "Gokak",
+            "గోకాక్",
+            "गोकाक",
+            "கோகாக்",
+            "ಗೋಕಾಕ್",
+            "गोकाक",
+            "গোকাক",
+          ),
+          village(
+            "Athani",
+            "అథణి",
+            "अथणी",
+            "அதணி",
+            "ಅಥಣಿ",
+            "अथणी",
+            "আথানি",
+          ),
+        ],
+      ),
+    ],
+  },
+];
+
+/* =========================================================
+   WEATHER TYPES
+========================================================= */
+
+type WeatherData = {
+  temperature: number;
+  humidity: number;
+  wind: number;
+  rain: number;
+  weatherCode: number;
+};
+
+/* =========================================================
+   OPEN-METEO GEOCODING
+========================================================= */
+
+type GeocodingResponse = {
+  results?: Array<{
+    latitude: number;
+    longitude: number;
+    name: string;
+    country?: string;
+    admin1?: string;
+    admin2?: string;
+  }>;
+};
+
+async function getCoordinates(
+  villageName: string,
+  districtName: string,
+  stateName: string,
+): Promise<{
+  latitude: number;
+  longitude: number;
+}> {
+  // First try the village name with India filter.
+  const url =
+    `https://geocoding-api.open-meteo.com/v1/search` +
+    `?name=${encodeURIComponent(villageName)}` +
+    `&count=10` +
+    `&language=en` +
+    `&format=json` +
+    `&countryCode=IN`;
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("Geocoding request failed");
+  }
+
+  const data: GeocodingResponse =
+    await response.json();
+
+  if (!data.results || data.results.length === 0) {
+    throw new Error(
+      `Location not found: ${villageName}`,
+    );
+  }
+
+  /*
+   * Prefer a result matching the selected
+   * district and state.
+   */
+  const matchingResult = data.results.find(
+    (result) => {
+      const admin1 =
+        result.admin1?.toLowerCase() ?? "";
+
+      const admin2 =
+        result.admin2?.toLowerCase() ?? "";
+
+      return (
+        admin1.includes(
+          stateName.toLowerCase(),
+        ) ||
+        admin2.includes(
+          districtName.toLowerCase(),
+        )
+      );
+    },
+  );
+
+  /*
+   * If a matching district/state result exists,
+   * use it. Otherwise use the first Indian result.
+   */
+  const firstResult = data.results[0];
+
+  if (!firstResult) {
+    throw new Error("Location not found");
+  }
+
+  const indianResult =
+    matchingResult ?? firstResult;
+
+  return {
+    latitude: indianResult.latitude,
+    longitude: indianResult.longitude,
+  };
+}
+/* =========================================================
+   OPEN-METEO WEATHER
+========================================================= */
+
+type OpenMeteoResponse = {
+  current: {
+    temperature_2m: number;
+    relative_humidity_2m: number;
+    wind_speed_10m: number;
+    weather_code: number;
+  };
+  hourly: {
+    precipitation_probability: number[];
+  };
+};
+
+async function getRealWeather(
+  latitude: number,
+  longitude: number,
+): Promise<WeatherData> {
+  const url =
+    `https://api.open-meteo.com/v1/forecast` +
+    `?latitude=${latitude}` +
+    `&longitude=${longitude}` +
+    `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code` +
+    `&hourly=precipitation_probability` +
+    `&forecast_days=1` +
+    `&timezone=auto`;
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("Weather API request failed");
+  }
+
+  const data: OpenMeteoResponse =
+    await response.json();
+
+  /*
+   * The first hourly precipitation probability
+   * is used as the current/nearest forecast probability.
+   */
+  const rain =
+    data.hourly?.precipitation_probability?.[0] ?? 0;
+
+  return {
+    temperature: Math.round(
+      data.current.temperature_2m,
+    ),
+    humidity: Math.round(
+      data.current.relative_humidity_2m,
+    ),
+    wind: Math.round(
+      data.current.wind_speed_10m,
+    ),
+    rain: Math.round(rain),
+    weatherCode: data.current.weather_code,
   };
 }
 
-function buildForecast(state: string, district: string, seedOffset: number): DayForecast[] {
-  const base = state + district + seedOffset;
-  const rand = seedRandom(base);
-  const today = new Date();
-  const days: DayForecast[] = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    const rain = Math.floor(rand() * 100);
-    const conditionIndex = rain > 80 ? 4 : rain > 50 ? 3 : rain > 30 ? 2 : rain > 15 ? 1 : 0;
-    const condition = conditions[conditionIndex]!;
-    const high = Math.floor(26 + rand() * 14);
-    const low = high - Math.floor(7 + rand() * 6);
-    const humidity = Math.floor(50 + rand() * 45);
-    const wind = Math.floor(5 + rand() * 25);
-    days.push({
-      date: d.toLocaleDateString("en-IN", { day: "numeric", month: "short" }),
-      dayName: i === 0 ? "Today" : d.toLocaleDateString("en-IN", { weekday: "short" }),
-      icon: condition.icon,
-      high,
-      low,
-      rain,
-      humidity,
-      wind,
-      label: condition.label,
-    });
+/* =========================================================
+   WEATHER CONDITION
+========================================================= */
+
+function getCondition(
+  weatherCode: number,
+  t: PageText,
+) {
+  if (
+    weatherCode === 95 ||
+    weatherCode === 96 ||
+    weatherCode === 99
+  ) {
+    return {
+      icon: "⛈️",
+      text: t.thunderstorm,
+    };
   }
-  return days;
+
+  if (
+    weatherCode >= 51 &&
+    weatherCode <= 67
+  ) {
+    return {
+      icon: "🌦️",
+      text: t.rainy,
+    };
+  }
+
+  if (
+    weatherCode >= 80 &&
+    weatherCode <= 82
+  ) {
+    return {
+      icon: "🌧️",
+      text: t.rainy,
+    };
+  }
+
+  if (
+    weatherCode === 1 ||
+    weatherCode === 2 ||
+    weatherCode === 3
+  ) {
+    return {
+      icon: "⛅",
+      text: t.cloudy,
+    };
+  }
+
+  return {
+    icon: "☀️",
+    text: t.sunny,
+  };
 }
 
-const cropAdvice: Record<
-  string,
-  {
-    sowing: string;
-    irrigation: string;
-    fertilizer: string;
-    pest: string;
-    spraying: string;
-    rain: string;
-  }
-> = {
-  Wheat: {
-    sowing: "Sow wheat when soil temperature is 15-22°C and the field is well-prepared after rice harvest.",
-    irrigation: "Irrigate at crown-root stage and again at flowering. Avoid waterlogging after rain.",
-    fertilizer: "Apply first split of 60 kg urea per acre at tillering stage if the forecast is dry.",
-    pest: "Watch for yellow rust in cool humid spells; yellow-orange streaks on leaves need urgent spray.",
-    spraying: "Foliar fungicide works best on dry, calm mornings with wind below 12 km/h.",
-    rain: "Heavy rain after sowing can delay emergence and promote root rot; ensure field drainage.",
-  },
-  "Rice / Paddy": {
-    sowing: "Transplant 20-25 day-old seedlings after monsoon rain fills the field.",
-    irrigation: "Maintain 2-5 cm standing water during tillering and booting; drain before harvest.",
-    fertilizer: "Avoid top-dressing nitrogen if heavy rain is expected in the next 48 hours.",
-    pest: "Bacterial leaf blight spreads in warm humid weather; watch for water-soaked leaf tips.",
-    spraying: "Do not spray within 6 hours of expected rain; use a sticker-spreader in drizzles.",
-    rain: "Strong winds during rain can lodge the crop; keep fields at moderate water depth.",
-  },
-  Tomato: {
-    sowing: "Sow nursery seeds in warm soil; transplant after danger of frost and heavy rain passes.",
-    irrigation: "Drip irrigation at 6-8 mm daily gives the best yield and reduces fruit cracking.",
-    fertilizer: "Top-dress with NPK 19:19:19 after fruit-set; pause before forecast rain.",
-    pest: "Early blight and leaf curl thrive in humid weather; scout lower leaves twice a week.",
-    spraying: "Apply fungicide early morning; avoid spraying when wind is above 15 km/h.",
-    rain: "Sudden heavy rain causes fruit splitting and blossom-end rot; mulch beds to reduce splash.",
-  },
-  Cotton: {
-    sowing: "Sow cotton when soil temperature stays above 20°C and monsoon is active but not flooding.",
-    irrigation: "Irrigate during flowering and boll formation; reduce water after first flush.",
-    fertilizer: "Apply 40 kg urea per acre at squaring stage; skip if heavy rain is expected.",
-    pest: "Pink bollworm and whitefly peak in warm dry spells; monitor bolls for entry holes.",
-    spraying: "Bollworm spray is effective on calm, rain-free days; spray before 9 AM.",
-    rain: "Prolonged rain increases boll rot; ensure drainage and pick mature bolls quickly.",
-  },
-  Groundnut: {
-    sowing: "Sow groundnut when soil moisture is adequate and 3-4 days of rain are not expected.",
-    irrigation: "Critical irrigations at pegging and pod-filling; avoid during harvest.",
-    fertilizer: "Apply gypsum at flowering and a light dose of DAP at 25 days after sowing.",
-    pest: "Leaf miner and red hairy caterpillar appear in dry spells; inspect under the canopy.",
-    spraying: "Foliar calcium and fungicide sprays should be done on dry, cloudy mornings.",
-    rain: "Waterlogging during pod-filling causes root rot; build raised ridges and open drains.",
-  },
+/* =========================================================
+   CROP RECOMMENDATION
+========================================================= */
+
+type CropResult = {
+  name: string;
+  reason: string;
 };
 
-function alertToneClass(tone: "warning" | "info" | "success") {
-  if (tone === "success") return "bg-success/20 text-success";
-  if (tone === "info") return "bg-primary/10 text-primary";
-  return "bg-warning/20 text-warning";
+function getCrop(
+  weather: WeatherData,
+  t: PageText,
+): CropResult {
+  if (weather.rain >= 60 || weather.humidity >= 80) {
+    return {
+      name: `🌾 ${t.paddy}`,
+      reason: t.paddyReason,
+    };
+  }
+
+  if (weather.temperature <= 28) {
+    return {
+      name: `🌿 ${t.wheat}`,
+      reason: t.wheatReason,
+    };
+  }
+
+  if (
+    weather.temperature >= 32 &&
+    weather.rain < 40
+  ) {
+    return {
+      name: `🥜 ${t.groundnut}`,
+      reason: t.groundnutReason,
+    };
+  }
+
+  return {
+    name: `🍅 ${t.tomato}`,
+    reason: t.tomatoReason,
+  };
 }
 
-function alertIcon(tone: "warning" | "info" | "success") {
-  if (tone === "success") return <Sprout className="size-5" />;
-  if (tone === "info") return <CloudSun className="size-5" />;
-  return <AlertTriangle className="size-5" />;
-}
+/* =========================================================
+   WEATHER PAGE
+========================================================= */
 
 function WeatherPage() {
-  const t = useT();
-  const [state, setState] = useState("Maharashtra");
-  const [district, setDistrict] = useState("Nashik");
-  const [crop, setCrop] = useState("Tomato");
-  const [seedOffset, setSeedOffset] = useState(0);
-  const [forecast, setForecast] = useState<DayForecast[]>(() => buildForecast("Maharashtra", "Nashik", 0));
+  const { lang } = useI18n();
 
-  useEffect(() => {
-    setForecast(buildForecast(state, district, seedOffset));
-  }, [state, district, seedOffset]);
+  const t: PageText =
+    pageText[lang] ?? pageText.en;
 
-  const today = forecast[0]!;
-  const maxRain = Math.max(...forecast.map((d) => d.rain));
-  const maxTemp = Math.max(...forecast.map((d) => d.high));
-  const anyRain = forecast.some((d) => d.rain >= 60);
-  const dryDays = forecast.filter((d) => d.rain < 20).length;
-  const highTempDays = forecast.filter((d) => d.high >= 38).length;
+  const [selectedState, setSelectedState] =
+    useState("");
 
-  const alerts = useMemo(() => {
-    const list: { label: string; message: string; tone: "warning" | "info" | "success" }[] = [];
-    if (maxRain >= 80) {
-      list.push({
-        label: "Heavy Rain Expected",
-        message: "More than 80% rain chance in the coming week. Secure stored crops and clear drains.",
-        tone: "warning",
-      });
-    }
-    if (highTempDays >= 2) {
-      list.push({
-        label: "High Temperature",
-        message: highTempDays + " day(s) above 38°C. Avoid heavy field work at midday; irrigate sensitive crops.",
-        tone: "warning",
-      });
-    }
-    if (dryDays >= 3 && maxTemp < 38) {
-      list.push({
-        label: "Suitable for Irrigation",
-        message: "Several dry, warm days ahead. Good window for basin or drip irrigation and fertilizer application.",
-        tone: "success",
-      });
-    }
-    if (anyRain) {
-      list.push({
-        label: "Avoid Spraying Before Rain",
-        message: "Rain is expected within the next 7 days. Delay pesticide and foliar sprays until after the rain passes.",
-        tone: "warning",
-      });
-    }
-    if (list.length === 0) {
-      list.push({
-        label: "Normal Weather",
-        message: "No strong weather extremes expected. Follow routine crop care and scout the field every 2-3 days.",
-        tone: "info",
-      });
-    }
-    return list;
-  }, [forecast, maxRain, highTempDays, dryDays, maxTemp, anyRain]);
+  const [selectedDistrict, setSelectedDistrict] =
+    useState("");
 
-  const advice = cropAdvice[crop]!;
-  const todayDescription = "Generated for " + crop + " in " + district + ".";
-  const cropDescription = "Sowing, irrigation, pest and spraying guidance for " + crop + ".";
+  const [selectedVillage, setSelectedVillage] =
+    useState("");
+
+  const [weather, setWeather] =
+    useState<WeatherData | null>(null);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  /* =====================================================
+     SELECTED STATE
+  ===================================================== */
+
+  const currentState = useMemo(() => {
+    return locations.find(
+      (item) =>
+        item.name.en === selectedState,
+    );
+  }, [selectedState]);
+
+  /* =====================================================
+     SELECTED DISTRICT
+  ===================================================== */
+
+  const currentDistrict = useMemo(() => {
+    return currentState?.districts.find(
+      (item) =>
+        item.name.en === selectedDistrict,
+    );
+  }, [
+    currentState,
+    selectedDistrict,
+  ]);
+
+  /* =====================================================
+     SELECTED VILLAGE
+  ===================================================== */
+
+  const currentVillage = useMemo(() => {
+    return currentDistrict?.villages.find(
+      (item) =>
+        item.name.en === selectedVillage,
+    );
+  }, [
+    currentDistrict,
+    selectedVillage,
+  ]);
+
+  /* =====================================================
+     STATE CHANGE
+  ===================================================== */
+
+  const handleStateChange = (
+    value: string,
+  ) => {
+    setSelectedState(value);
+    setSelectedDistrict("");
+    setSelectedVillage("");
+    setWeather(null);
+    setError("");
+  };
+
+  /* =====================================================
+     DISTRICT CHANGE
+  ===================================================== */
+
+  const handleDistrictChange = (
+    value: string,
+  ) => {
+    setSelectedDistrict(value);
+    setSelectedVillage("");
+    setWeather(null);
+    setError("");
+  };
+
+  /* =====================================================
+     VILLAGE CHANGE
+  ===================================================== */
+
+  const handleVillageChange = (
+    value: string,
+  ) => {
+    setSelectedVillage(value);
+    setWeather(null);
+    setError("");
+  };
+
+  /* =====================================================
+     GET REAL WEATHER
+  ===================================================== */
+
+  const handleGetWeather = async () => {
+    if (
+      !selectedState ||
+      !selectedDistrict ||
+      !selectedVillage ||
+      !currentVillage ||
+      !currentDistrict ||
+      !currentState
+    ) {
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setWeather(null);
+
+    try {
+      /*
+       * STEP 1:
+       * Find latitude and longitude of selected village.
+       */
+      const coordinates =
+        await getCoordinates(
+          currentVillage.searchName,
+          currentDistrict.searchName,
+          currentState.searchName,
+        );
+
+      /*
+       * STEP 2:
+       * Get live weather using coordinates.
+       */
+      const result =
+        await getRealWeather(
+          coordinates.latitude,
+          coordinates.longitude,
+        );
+
+      setWeather(result);
+    } catch (err) {
+      console.error(
+        "Weather error:",
+        err,
+      );
+
+      setError(t.weatherError);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* =====================================================
+     CROP
+  ===================================================== */
+
+  const crop =
+    weather
+      ? getCrop(weather, t)
+      : null;
+
+  /* =====================================================
+     CONDITION
+  ===================================================== */
+
+  const condition =
+    weather
+      ? getCondition(
+          weather.weatherCode,
+          t,
+        )
+      : null;
 
   return (
-    <>
-      <PageHeader
-        icon={CloudSun}
-        eyebrow={t("page.weather.eyebrow")}
-        title={t("nav.weather")}
-        description={t("page.weather.description")}
-      />
-      <Section>
-        <div className="mb-6 rounded-2xl border border-border bg-background p-5 shadow-soft md:p-6">
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-2">
-              <Label htmlFor="weather-state">State</Label>
-              <Select value={state} onValueChange={setState}>
-                <SelectTrigger id="weather-state" aria-label="Select state">
-                  <SelectValue placeholder="Select state" />
-                </SelectTrigger>
-                <SelectContent>
-                  {states.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#f4faf5",
+        padding: "30px 20px",
+        fontFamily:
+          "Arial, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        {/* =================================================
+            HEADER
+        ================================================= */}
+
+        <div
+          style={{
+            marginBottom: "30px",
+          }}
+        >
+          <h1
+            style={{
+              fontSize: "34px",
+              marginBottom: "10px",
+              color: "#1b5e20",
+            }}
+          >
+            {t.title}
+          </h1>
+
+          <p
+            style={{
+              fontSize: "17px",
+              color: "#555",
+            }}
+          >
+            {t.subtitle}
+          </p>
+        </div>
+
+        {/* =================================================
+            LOCATION SELECTION
+        ================================================= */}
+
+        <div
+          style={{
+            background: "#ffffff",
+            padding: "25px",
+            borderRadius: "18px",
+            boxShadow:
+              "0 4px 18px rgba(0,0,0,0.08)",
+            marginBottom: "25px",
+          }}
+        >
+          <h2
+            style={{
+              marginTop: 0,
+            }}
+          >
+            📍 {t.location}
+          </h2>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: "18px",
+              marginTop: "20px",
+            }}
+          >
+            {/* STATE */}
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "bold",
+                  marginBottom: "8px",
+                }}
+              >
+                {t.state}
+              </label>
+
+              <select
+                value={selectedState}
+                onChange={(e) =>
+                  handleStateChange(
+                    e.target.value,
+                  )
+                }
+                style={{
+                  width: "100%",
+                  padding: "13px",
+                  borderRadius: "10px",
+                  border:
+                    "1px solid #ccc",
+                  fontSize: "15px",
+                  background: "white",
+                }}
+              >
+                <option value="">
+                  {t.selectState}
+                </option>
+
+                {locations.map(
+                  (item) => (
+                    <option
+                      key={
+                        item.name.en
+                      }
+                      value={
+                        item.name.en
+                      }
+                    >
+                      {
+                        item.name[
+                          lang
+                        ]
+                      }
+                    </option>
+                  ),
+                )}
+              </select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="weather-district">District / Village</Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="weather-district"
-                  placeholder="e.g. Rampur, Nashik"
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                  className="pl-9"
+
+            {/* DISTRICT */}
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "bold",
+                  marginBottom: "8px",
+                }}
+              >
+                {t.district}
+              </label>
+
+              <select
+                value={
+                  selectedDistrict
+                }
+                onChange={(e) =>
+                  handleDistrictChange(
+                    e.target.value,
+                  )
+                }
+                disabled={
+                  !selectedState
+                }
+                style={{
+                  width: "100%",
+                  padding: "13px",
+                  borderRadius: "10px",
+                  border:
+                    "1px solid #ccc",
+                  fontSize: "15px",
+                  background:
+                    "white",
+                }}
+              >
+                <option value="">
+                  {t.selectDistrict}
+                </option>
+
+                {currentState?.districts.map(
+                  (item) => (
+                    <option
+                      key={
+                        item.name.en
+                      }
+                      value={
+                        item.name.en
+                      }
+                    >
+                      {
+                        item.name[
+                          lang
+                        ]
+                      }
+                    </option>
+                  ),
+                )}
+              </select>
+            </div>
+
+            {/* VILLAGE */}
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "bold",
+                  marginBottom: "8px",
+                }}
+              >
+                {t.village}
+              </label>
+
+              <select
+                value={
+                  selectedVillage
+                }
+                onChange={(e) =>
+                  handleVillageChange(
+                    e.target.value,
+                  )
+                }
+                disabled={
+                  !selectedDistrict
+                }
+                style={{
+                  width: "100%",
+                  padding: "13px",
+                  borderRadius: "10px",
+                  border:
+                    "1px solid #ccc",
+                  fontSize: "15px",
+                  background:
+                    "white",
+                }}
+              >
+                <option value="">
+                  {t.selectVillage}
+                </option>
+
+                {currentDistrict?.villages.map(
+                  (item) => (
+                    <option
+                      key={
+                        item.name.en
+                      }
+                      value={
+                        item.name.en
+                      }
+                    >
+                      {
+                        item.name[
+                          lang
+                        ]
+                      }
+                    </option>
+                  ),
+                )}
+              </select>
+            </div>
+          </div>
+
+          {/* BUTTON */}
+
+          <button
+            onClick={
+              handleGetWeather
+            }
+            disabled={
+              loading ||
+              !selectedState ||
+              !selectedDistrict ||
+              !selectedVillage
+            }
+            style={{
+              marginTop: "22px",
+              padding:
+                "14px 22px",
+              border: "none",
+              borderRadius:
+                "10px",
+              background:
+                loading ||
+                !selectedState ||
+                !selectedDistrict ||
+                !selectedVillage
+                  ? "#aaa"
+                  : "#2e7d32",
+              color: "white",
+              fontSize: "16px",
+              fontWeight: "bold",
+              cursor:
+                loading ||
+                !selectedState ||
+                !selectedDistrict ||
+                !selectedVillage
+                  ? "not-allowed"
+                  : "pointer",
+            }}
+          >
+            {loading
+              ? `⏳ ${t.loading}`
+              : `🌦️ ${t.getWeather}`}
+          </button>
+        </div>
+
+        {/* =================================================
+            ERROR
+        ================================================= */}
+
+        {error && (
+          <div
+            style={{
+              background: "#ffebee",
+              color: "#c62828",
+              padding: "18px",
+              borderRadius: "12px",
+              marginBottom: "25px",
+              border:
+                "1px solid #ffcdd2",
+            }}
+          >
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* =================================================
+            WEATHER RESULT
+        ================================================= */}
+
+        {weather && (
+          <>
+            <div
+              style={{
+                background: "#ffffff",
+                padding: "25px",
+                borderRadius: "18px",
+                boxShadow:
+                  "0 4px 18px rgba(0,0,0,0.08)",
+                marginBottom: "25px",
+              }}
+            >
+              <h2
+                style={{
+                  marginTop: 0,
+                }}
+              >
+                📍{" "}
+                {currentVillage?.name[
+                  lang
+                ] ?? ""}
+                {", "}
+                {currentDistrict?.name[
+                  lang
+                ] ?? ""}
+              </h2>
+
+              <p
+                style={{
+                  color: "#666",
+                  marginBottom:
+                    "20px",
+                }}
+              >
+                {currentState?.name[
+                  lang
+                ] ?? ""}
+              </p>
+
+              {/* LIVE BADGE */}
+
+              <div
+                style={{
+                  display:
+                    "inline-block",
+                  background:
+                    "#e8f5e9",
+                  color:
+                    "#2e7d32",
+                  padding:
+                    "7px 12px",
+                  borderRadius:
+                    "20px",
+                  fontWeight:
+                    "bold",
+                  fontSize:
+                    "14px",
+                  marginBottom:
+                    "20px",
+                }}
+              >
+                🟢 {t.live}
+              </div>
+
+              {/* MAIN WEATHER */}
+
+              <div
+                style={{
+                  textAlign:
+                    "center",
+                  padding:
+                    "10px",
+                  marginBottom:
+                    "20px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize:
+                      "48px",
+                    fontWeight:
+                      "bold",
+                    color:
+                      "#2e7d32",
+                  }}
+                >
+                  {
+                    weather.temperature
+                  }
+                  °C
+                </div>
+
+                <div
+                  style={{
+                    fontSize:
+                      "22px",
+                    marginTop:
+                      "8px",
+                  }}
+                >
+                  {
+                    condition?.icon
+                  }{" "}
+                  {
+                    condition?.text
+                  }
+                </div>
+              </div>
+
+              {/* WEATHER CARDS */}
+
+              <div
+                style={{
+                  display:
+                    "grid",
+                  gridTemplateColumns:
+                    "repeat(auto-fit, minmax(180px, 1fr))",
+                  gap: "15px",
+                }}
+              >
+                <Info
+                  icon="🌡️"
+                  title={
+                    t.temperature
+                  }
+                  value={`${weather.temperature}°C`}
+                />
+
+                <Info
+                  icon="💧"
+                  title={
+                    t.humidity
+                  }
+                  value={`${weather.humidity}%`}
+                />
+
+                <Info
+                  icon="💨"
+                  title={
+                    t.wind
+                  }
+                  value={`${weather.wind} km/h`}
+                />
+
+                <Info
+                  icon="🌧️"
+                  title={
+                    t.rain
+                  }
+                  value={`${weather.rain}%`}
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="weather-crop">Crop</Label>
-              <Select value={crop} onValueChange={setCrop}>
-                <SelectTrigger id="weather-crop" aria-label="Select crop">
-                  <SelectValue placeholder="Select crop" />
-                </SelectTrigger>
-                <SelectContent>
-                  {crops.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-end">
-              <Button variant="outline" className="w-full" onClick={() => setSeedOffset((s) => s + 1)}>
-                <RefreshCw className="mr-2 size-4" />
-                Refresh Forecast
-              </Button>
-            </div>
-          </div>
 
-          <div className="mt-5 rounded-xl border border-warning/30 bg-warning/10 p-4">
-            <p className="text-sm font-semibold text-warning-foreground">
-              Demo forecast — connect to a live weather service in the future.
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              The data shown here is simulated for demonstration. Do not use it for real-time farming decisions without checking IMD or a trusted local source.
-            </p>
-          </div>
-        </div>
+            {/* =================================================
+                CROP
+            ================================================= */}
 
-        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-          <Card className="gradient-canopy border-0 text-primary-foreground shadow-lift">
-            <CardContent className="p-8">
-              <p className="text-sm uppercase tracking-widest text-primary-foreground/80">
-                {district}, {state}
-              </p>
-              <div className="mt-3 flex items-end gap-4">
-                <span className="text-6xl font-semibold">{today.high}°</span>
-                <div className="pb-2">
-                  <p className="text-lg font-medium">{today.label}</p>
-                  <p className="text-sm text-primary-foreground/80">
-                    Feels like {today.high + 3}° · Low {today.low}°
-                  </p>
-                </div>
-              </div>
-              <div className="mt-8 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
-                <div className="rounded-2xl bg-background/15 p-4">
-                  <Droplets className="size-4" />
-                  <p className="mt-2 font-semibold">{today.humidity}%</p>
-                  <p className="text-primary-foreground/80">Humidity</p>
-                </div>
-                <div className="rounded-2xl bg-background/15 p-4">
-                  <Wind className="size-4" />
-                  <p className="mt-2 font-semibold">{today.wind} km/h</p>
-                  <p className="text-primary-foreground/80">Wind</p>
-                </div>
-                <div className="rounded-2xl bg-background/15 p-4">
-                  <CloudRain className="size-4" />
-                  <p className="mt-2 font-semibold">{today.rain}%</p>
-                  <p className="text-primary-foreground/80">Rain chance</p>
-                </div>
-                <div className="rounded-2xl bg-background/15 p-4">
-                  <Thermometer className="size-4" />
-                  <p className="mt-2 font-semibold">{today.low}°</p>
-                  <p className="text-primary-foreground/80">Low</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-warning/40 shadow-soft">
-            <CardHeader className="flex-row items-center gap-3">
-              <AlertTriangle className="size-5 text-warning" />
-              <CardTitle className="text-base">Active alerts</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {alerts.slice(0, 2).map((a) => (
-                <Badge
-                  key={a.label}
-                  className={
-                    a.tone === "success"
-                      ? "bg-success text-success-foreground hover:bg-success"
-                      : "bg-warning text-warning-foreground hover:bg-warning"
-                  }
+            {crop && (
+              <div
+                style={{
+                  background:
+                    "#e8f5e9",
+                  padding:
+                    "28px",
+                  borderRadius:
+                    "18px",
+                  marginBottom:
+                    "25px",
+                  border:
+                    "1px solid #c8e6c9",
+                }}
+              >
+                <h2
+                  style={{
+                    marginTop: 0,
+                  }}
                 >
-                  {a.label}
-                </Badge>
-              ))}
-              <p className="text-sm text-muted-foreground">{alerts[0]!.message}</p>
-            </CardContent>
-          </Card>
-        </div>
+                  🌱{" "}
+                  {t.bestCrop}
+                </h2>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-7">
-          {forecast.map((d) => (
-            <Card key={d.dayName + d.date} className="card-hover text-center shadow-soft">
-              <CardContent className="p-5">
-                <p className="text-sm font-semibold">{d.dayName}</p>
-                <p className="text-xs text-muted-foreground">{d.date}</p>
-                <d.icon className="mx-auto mt-3 size-7 text-primary" />
-                <p className="mt-3 text-lg font-semibold">
-                  {d.high}° <span className="text-sm text-muted-foreground">/ {d.low}°</span>
+                <h1
+                  style={{
+                    color:
+                      "#2e7d32",
+                    marginBottom:
+                      "15px",
+                  }}
+                >
+                  {crop.name}
+                </h1>
+
+                <h3>
+                  {t.whyCrop}
+                </h3>
+
+                <p
+                  style={{
+                    fontSize:
+                      "17px",
+                    lineHeight:
+                      "1.6",
+                  }}
+                >
+                  {crop.reason}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">{d.label}</p>
-                <div className="mt-3 space-y-1 text-xs text-muted-foreground">
-                  <p className="flex items-center justify-center gap-1">
-                    <Umbrella className="size-3" /> {d.rain}%
-                  </p>
-                  <p className="flex items-center justify-center gap-1">
-                    <Droplets className="size-3" /> {d.humidity}%
-                  </p>
-                  <p className="flex items-center justify-center gap-1">
-                    <Wind className="size-3" /> {d.wind} km/h
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </Section>
+              </div>
+            )}
 
-      <Section title="Today's farming advice" description={`Generated for ${crop} in ${district}.`}>
-        <div className="grid gap-5 lg:grid-cols-3">
-          {alerts.map((a) => (
-            <Card key={a.label} className="shadow-soft">
-              <CardHeader>
-                <span className={"flex size-10 items-center justify-center rounded-2xl " + alertToneClass(a.tone)}>
-                  {alertIcon(a.tone)}
-                </span>
-                <CardTitle className="mt-3 text-base">{a.label}</CardTitle>
-                <CardDescription>{a.message}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      </Section>
+            {/* =================================================
+                FARMING ADVICE
+            ================================================= */}
 
-      <Section title="Crop-specific advisory" description={cropDescription}>
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="shadow-soft">
-            <CardHeader>
-              <CardTitle className="text-base">Sowing advice</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{advice.sowing}</p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-soft">
-            <CardHeader>
-              <CardTitle className="text-base">Irrigation advice</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{advice.irrigation}</p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-soft">
-            <CardHeader>
-              <CardTitle className="text-base">Fertilizer advice</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{advice.fertilizer}</p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-soft">
-            <CardHeader>
-              <CardTitle className="text-base">Pest / disease precaution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{advice.pest}</p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-soft">
-            <CardHeader>
-              <CardTitle className="text-base">Spraying recommendation</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{advice.spraying}</p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-soft">
-            <CardHeader>
-              <CardTitle className="text-base">Rain warning</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{advice.rain}</p>
-            </CardContent>
-          </Card>
-        </div>
-      </Section>
-    </>
+            <div
+              style={{
+                background:
+                  "#ffffff",
+                padding:
+                  "28px",
+                borderRadius:
+                  "18px",
+                boxShadow:
+                  "0 4px 18px rgba(0,0,0,0.08)",
+                marginBottom:
+                  "25px",
+              }}
+            >
+              <h2
+                style={{
+                  marginTop: 0,
+                }}
+              >
+                🌾{" "}
+                {t.advice}
+              </h2>
+
+              <Advice
+                icon="💧"
+                title={
+                  t.irrigation
+                }
+                text={
+                  weather.rain >
+                    60
+                    ? t.highRain
+                    : t.normalIrrigation
+                }
+              />
+
+              <Advice
+                icon="🌱"
+                title={
+                  t.fertilizer
+                }
+                text={
+                  t.fertilizerAdvice
+                }
+              />
+
+              <Advice
+                icon="🐛"
+                title={
+                  t.pest
+                }
+                text={
+                  t.pestAdvice
+                }
+              />
+
+              <Advice
+                icon="🚜"
+                title={
+                  t.spraying
+                }
+                text={
+                  weather.wind >
+                  15
+                    ? t.highWindSpraying
+                    : t.normalSpraying
+                }
+              />
+            </div>
+
+            {/* =================================================
+                SELECTED LOCATION
+            ================================================= */}
+
+            <div
+              style={{
+                background:
+                  "#fff8e1",
+                padding:
+                  "22px",
+                borderRadius:
+                  "16px",
+                marginBottom:
+                  "25px",
+              }}
+            >
+              <strong>
+                📍{" "}
+                {
+                  t.selectedLocation
+                }
+              </strong>
+
+              <p>
+                {t.state}:{" "}
+                {
+                  currentState?.name[
+                    lang
+                  ] ?? ""
+                }
+              </p>
+
+              <p>
+                {t.district}:{" "}
+                {
+                  currentDistrict?.name[
+                    lang
+                  ] ?? ""
+                }
+              </p>
+
+              <p>
+                {t.village}:{" "}
+                {
+                  currentVillage?.name[
+                    lang
+                  ] ?? ""
+                }
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   WEATHER INFO CARD
+========================================================= */
+
+function Info({
+  icon,
+  title,
+  value,
+}: {
+  icon: string;
+  title: string;
+  value: string;
+}) {
+  return (
+    <div
+      style={{
+        background:
+          "#f5f5f5",
+        borderRadius:
+          "14px",
+        padding:
+          "20px",
+        textAlign:
+          "center",
+      }}
+    >
+      <div
+        style={{
+          fontSize:
+            "28px",
+        }}
+      >
+        {icon}
+      </div>
+
+      <div
+        style={{
+          color:
+            "#666",
+          marginTop:
+            "8px",
+          marginBottom:
+            "5px",
+        }}
+      >
+        {title}
+      </div>
+
+      <strong
+        style={{
+          fontSize:
+            "24px",
+        }}
+      >
+        {value}
+      </strong>
+    </div>
+  );
+}
+
+/* =========================================================
+   FARMING ADVICE CARD
+========================================================= */
+
+function Advice({
+  icon,
+  title,
+  text,
+}: {
+  icon: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div
+      style={{
+        display:
+          "flex",
+        gap:
+          "15px",
+        padding:
+          "18px 0",
+        borderBottom:
+          "1px solid #eee",
+      }}
+    >
+      <div
+        style={{
+          fontSize:
+            "28px",
+        }}
+      >
+        {icon}
+      </div>
+
+      <div>
+        <h3
+          style={{
+            margin:
+              "0 0 6px",
+          }}
+        >
+          {title}
+        </h3>
+
+        <p
+          style={{
+            margin: 0,
+            color:
+              "#555",
+            lineHeight:
+              "1.5",
+          }}
+        >
+          {text}
+        </p>
+      </div>
+    </div>
   );
 }
